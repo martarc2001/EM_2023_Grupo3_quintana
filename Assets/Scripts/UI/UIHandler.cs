@@ -9,11 +9,13 @@ namespace UI
         public GameObject debugPanel;
         public Button hostButton;
         public Button clientButton;
+        public Button serverButton;
 
         private void Start()
         {
             hostButton.onClick.AddListener(OnHostButtonClicked);
             clientButton.onClick.AddListener(OnClientButtonClicked);
+            serverButton.onClick.AddListener(OnServerButtonClicked);
         }
 
         private void OnHostButtonClicked()
@@ -25,6 +27,12 @@ namespace UI
         private void OnClientButtonClicked()
         {
             NetworkManager.Singleton.StartClient();
+            debugPanel.SetActive(false);
+        }
+
+        private void OnServerButtonClicked()
+        {
+            NetworkManager.Singleton.StartServer();
             debugPanel.SetActive(false);
         }
     }
