@@ -14,7 +14,8 @@ namespace Fighting
             GameObject otherObject = collision.gameObject;
             // Debug.Log($"Sword collision with {otherObject.name}");
 
-            Animator effect = Instantiate(effectsPrefab);
+            //Instancia la animación del efecto de corte hit03 en el 1er punto de contacto
+            Animator effect = Instantiate(effectsPrefab); 
             effect.transform.position = collision.GetContact(0).point;
             effect.SetTrigger(Hit03);
 

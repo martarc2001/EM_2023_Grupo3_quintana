@@ -9,10 +9,12 @@ namespace Netcode
     {
         public override void OnNetworkSpawn()
         {
-            if (!IsOwner) return;
+            if (!IsOwner) return; //Cuando spawnee, solo hará cosas respecto al personaje el propio poseedor
             
+            //FighterMovement ~ el personaje
             FighterMovement fighterMovement = GetComponent<FighterMovement>();
             InputSystem.Instance.Character = fighterMovement;
+
             ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
             virtualCamera.Follow = transform;
         }

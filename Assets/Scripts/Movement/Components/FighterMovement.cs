@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 
 namespace Movement.Components
 {
-    [RequireComponent(typeof(Rigidbody2D)), 
+    [RequireComponent(typeof(Rigidbody2D)),
      RequireComponent(typeof(Animator)),
      RequireComponent(typeof(NetworkObject))]
     public sealed class FighterMovement : NetworkBehaviour, IMoveableReceiver, IJumperReceiver, IFighterReceiver
@@ -21,7 +21,7 @@ namespace Movement.Components
 
         private Vector3 _direction = Vector3.zero;
         private bool _grounded = true;
-        
+
         private static readonly int AnimatorSpeed = Animator.StringToHash("speed");
         private static readonly int AnimatorVSpeed = Animator.StringToHash("vspeed");
         private static readonly int AnimatorGrounded = Animator.StringToHash("grounded");
@@ -29,6 +29,8 @@ namespace Movement.Components
         private static readonly int AnimatorAttack2 = Animator.StringToHash("attack2");
         private static readonly int AnimatorHit = Animator.StringToHash("hit");
         private static readonly int AnimatorDie = Animator.StringToHash("die");
+
+        //private NetworkVariable<int> vida;
 
         void Start()
         {
@@ -38,12 +40,14 @@ namespace Movement.Components
 
             _feet = transform.Find("Feet");
             _floor = LayerMask.GetMask("Floor");
+
+            //vida = new NetworkVariable<int>(10);
         }
 
         void Update()
         {
             if (!IsOwner) return;
-            
+
             _grounded = Physics2D.OverlapCircle(_feet.position, 0.1f, _floor);
             _animator.SetFloat(AnimatorSpeed, this._direction.magnitude);
             _animator.SetFloat(AnimatorVSpeed, this._rigidbody2D.velocity.y);
@@ -65,7 +69,8 @@ namespace Movement.Components
 
             bool lookingRight = direction == IMoveableReceiver.Direction.Right;
             _direction = (lookingRight ? 1f : -1f) * speed * Vector3.right;
-            transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1);
+            transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1); //localScale positivo: sprite mira a la izq
+                                                                             //localScale negativo: sprite mira a la dcha
         }
 
         public void Jump(IJumperReceiver.JumpStage stage)
@@ -86,7 +91,7 @@ namespace Movement.Components
 
         public void Attack1()
         {
-            _networkAnimator.SetTrigger(AnimatorAttack1);
+            _networkAnimator.SetTrigger(AnimatorAttack1); //AnimatorAttack1 es Animator.StringToHash("attack1"); cacheado  
         }
 
         public void Attack2()
@@ -97,6 +102,7 @@ namespace Movement.Components
         public void TakeHit()
         {
             _networkAnimator.SetTrigger(AnimatorHit);
+            //vida.Value-=1;
         }
 
         public void Die()
