@@ -7,13 +7,19 @@ public class ConnectedPlayers : NetworkBehaviour
 {
     public NetworkVariable<int> alivePlayers;
 
-    // Start is called before the first frame update
+    public GameObject imgGanar;
+    public GameObject imgPerder;
     void Start()
     {
         
     }
     private void Awake()
     {
+        imgPerder = GameObject.Find("NewCanvas6");
+        imgGanar = GameObject.Find("NewCanvasganado");
+
+        imgGanar.SetActive(false);
+        imgPerder.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
     }
 
@@ -21,5 +27,13 @@ public class ConnectedPlayers : NetworkBehaviour
     void Update()
     {
         
+    }
+    public void showGanar()
+    {
+        imgGanar.SetActive(true);
+    }
+    public void showPerder()
+    {
+        imgPerder.SetActive(true);
     }
 }

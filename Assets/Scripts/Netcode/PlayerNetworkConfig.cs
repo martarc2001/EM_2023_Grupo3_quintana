@@ -62,18 +62,18 @@ namespace Netcode
         [ClientRpc]
         public void checkWinClientRpc()
         {
-            
-           
+            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+
             if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
             {
                 print("has gabnado");
-            
 
+                players.showGanar();
             }
             else
             {
                 print("has perdido");
-           
+                players.showPerder();
             }
 
         }
