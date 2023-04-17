@@ -61,4 +61,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66a106a55342f094f8ddaecd816ba24d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  life:
+    m_InternalValue: 0
   characterPrefab: {fileID: 3010630682321582541, guid: 06b98e5343c113147985cd4116ac1cdb, type: 3}
+  msjGanar: {fileID: 2629072033587473415}
+  mjPerder: {fileID: 0}

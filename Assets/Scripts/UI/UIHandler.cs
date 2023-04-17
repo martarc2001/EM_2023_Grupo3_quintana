@@ -6,6 +6,7 @@ namespace UI
 {
     public class UIHandler : MonoBehaviour
     {
+   
         public GameObject debugPanel;
         public Button hostButton;
         public Button clientButton;
@@ -13,6 +14,7 @@ namespace UI
 
         private void Start()
         {
+          
             hostButton.onClick.AddListener(OnHostButtonClicked);
             clientButton.onClick.AddListener(OnClientButtonClicked);
             serverButton.onClick.AddListener(OnServerButtonClicked);

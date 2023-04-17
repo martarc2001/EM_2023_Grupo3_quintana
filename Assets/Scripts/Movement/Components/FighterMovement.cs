@@ -3,6 +3,7 @@ using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+
 namespace Movement.Components
 {
     [RequireComponent(typeof(Rigidbody2D)), 
@@ -21,7 +22,9 @@ namespace Movement.Components
 
         private Vector3 _direction = Vector3.zero;
         private bool _grounded = true;
-        
+
+        private Netcode.FighterNetworkConfig player;
+
         private static readonly int AnimatorSpeed = Animator.StringToHash("speed");
         private static readonly int AnimatorVSpeed = Animator.StringToHash("vspeed");
         private static readonly int AnimatorGrounded = Animator.StringToHash("grounded");
@@ -32,6 +35,8 @@ namespace Movement.Components
 
         void Start()
         {
+            player = GetComponent<Netcode.FighterNetworkConfig>();
+            print(player);
             _rigidbody2D = GetComponent<Rigidbody2D>();
             _animator = GetComponent<Animator>();
             _networkAnimator = GetComponent<NetworkAnimator>();
@@ -70,6 +75,8 @@ namespace Movement.Components
 
         public void Jump(IJumperReceiver.JumpStage stage)
         {
+          
+            
             switch (stage)
             {
                 case IJumperReceiver.JumpStage.Jumping:
@@ -82,6 +89,7 @@ namespace Movement.Components
                 case IJumperReceiver.JumpStage.Landing:
                     break;
             }
+         
         }
 
         public void Attack1()
@@ -96,12 +104,26 @@ namespace Movement.Components
 
         public void TakeHit()
         {
-            _networkAnimator.SetTrigger(AnimatorHit);
+        
+            if (IsOwner)
+            {
+                print("takehit");
+                _networkAnimator.SetTrigger(AnimatorHit);
+                print(player);
+                player.checkLife();
+            }
+               
+
         }
 
         public void Die()
         {
             _networkAnimator.SetTrigger(AnimatorDie);
         }
+
+       
     }
+
+
+
 }
