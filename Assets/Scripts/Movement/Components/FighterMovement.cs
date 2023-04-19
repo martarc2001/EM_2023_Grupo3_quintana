@@ -47,19 +47,32 @@ namespace Movement.Components
         void Update()
         {
             if (!IsOwner) return;
+            UpdateAnimationsServerRpc();
+          
+        }
 
+        [ServerRpc]
+        public void UpdateAnimationsServerRpc()
+        {
             _grounded = Physics2D.OverlapCircle(_feet.position, 0.1f, _floor);
             _animator.SetFloat(AnimatorSpeed, this._direction.magnitude);
             _animator.SetFloat(AnimatorVSpeed, this._rigidbody2D.velocity.y);
             _animator.SetBool(AnimatorGrounded, this._grounded);
+
+          
         }
+
+       
 
         void FixedUpdate()
         {
             _rigidbody2D.velocity = new Vector2(_direction.x, _rigidbody2D.velocity.y);
         }
 
-        public void Move(IMoveableReceiver.Direction direction)
+
+
+        [ServerRpc]
+        public void MoveServerRpc(IMoveableReceiver.Direction direction)
         {
             if (direction == IMoveableReceiver.Direction.None)
             {
@@ -71,9 +84,19 @@ namespace Movement.Components
             _direction = (lookingRight ? 1f : -1f) * speed * Vector3.right;
             transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1); //localScale positivo: sprite mira a la izq
                                                                              //localScale negativo: sprite mira a la dcha
+
+            FlipCharacterClientRpc(lookingRight);
         }
 
-        public void Jump(IJumperReceiver.JumpStage stage)
+        [ClientRpc]
+        public void FlipCharacterClientRpc(bool lookingRight)
+        {
+            transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1);
+        }
+
+
+        [ServerRpc]
+        public void JumpServerRpc(IJumperReceiver.JumpStage stage)
         {
             switch (stage)
             {
@@ -89,25 +112,33 @@ namespace Movement.Components
             }
         }
 
-        public void Attack1()
+      [ServerRpc]
+        public void Attack1ServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorAttack1); //AnimatorAttack1 es Animator.StringToHash("attack1"); cacheado  
+            Debug.Log("Attack1");
         }
 
-        public void Attack2()
+        [ServerRpc]
+        public void Attack2ServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorAttack2);
+            Debug.Log("Attack2");
         }
 
+        //Este metodo no es serverRPC porque al llamar a los ataques desde el servidor, también ejecuta el OnCollider de Weapon y en caso de que colisione, llamaría a TakeHit
         public void TakeHit()
         {
             _networkAnimator.SetTrigger(AnimatorHit);
+            Debug.Log("Takehit");
             //vida.Value-=1;
         }
 
-        public void Die()
+        [ServerRpc]
+        public void DieServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorDie);
+            Debug.Log("Takehit");
         }
     }
 }
