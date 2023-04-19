@@ -32,6 +32,8 @@ namespace Movement.Components
 
         //private NetworkVariable<int> vida;
 
+
+
         void Start()
         {
             _rigidbody2D = GetComponent<Rigidbody2D>();
@@ -40,6 +42,8 @@ namespace Movement.Components
 
             _feet = transform.Find("Feet");
             _floor = LayerMask.GetMask("Floor");
+
+
 
             //vida = new NetworkVariable<int>(10);
         }
@@ -71,7 +75,45 @@ namespace Movement.Components
             _direction = (lookingRight ? 1f : -1f) * speed * Vector3.right;
             transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1); //localScale positivo: sprite mira a la izq
                                                                              //localScale negativo: sprite mira a la dcha
+
+
+            //Forzamos que el HUD siempre salga de frente y no haga flip
+            /*
+            if (lookingRight) { transform.Find("HUD").localScale = new Vector3(1, 1, 1); }
+            else { transform.Find("HUD").localScale = new Vector3(-1, 1, 1); }
+            */
+            flipHUDServerRpc(lookingRight);
+            flipOtherHUDServerRpc();
         }
+
+        [ServerRpc]
+        public void flipHUDServerRpc( bool lookingRight)
+        {
+
+            flipHUDClientRpc( lookingRight ? 1 : -1);
+        }
+
+        [ClientRpc]
+        public void flipHUDClientRpc(int direction)
+        {
+            transform.Find("HUD").localScale = new Vector3(direction, 1, 1);
+        }
+
+
+        [ServerRpc]
+        public void flipOtherHUDServerRpc()
+        {
+            foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
+            {
+                Debug.LogWarning(client.ClientId +": "+ IsLocalPlayer);
+                if (IsLocalPlayer) break;
+                
+                Vector3 direction = client.PlayerObject.GetComponentInChildren<FighterMovement>()._direction;
+                client.PlayerObject.GetComponentInChildren<FighterMovement>().flipHUDClientRpc(direction.x < 0 ? 1 : -1);
+            }
+        }
+
+
 
         public void Jump(IJumperReceiver.JumpStage stage)
         {
