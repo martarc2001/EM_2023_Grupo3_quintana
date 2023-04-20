@@ -22,7 +22,7 @@ namespace Netcode
             //todos los clientes
 
             InputSystem.Instance.Character = null;
-            print(this.gameObject.GetComponentInParent<Netcode.PlayerNetworkConfig>());
+         
             this.gameObject.GetComponentInParent<Netcode.PlayerNetworkConfig>().checkLifeServerRpc();
         }
     }
