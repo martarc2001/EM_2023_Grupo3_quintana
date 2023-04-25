@@ -1,3 +1,4 @@
+using UI;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -11,7 +12,10 @@ namespace Netcode
         public override void OnNetworkSpawn()
         {
             if (!IsOwner) return;
-            InstantiateCharacterServerRpc(OwnerClientId);
+            //InstantiateCharacterServerRpc(OwnerClientId);
+
+            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
+            ChangeCharacterServerRpc(OwnerClientId, prefabName);
         }
     
         [ServerRpc]
@@ -20,6 +24,26 @@ namespace Netcode
             GameObject characterGameObject = Instantiate(characterPrefab);
             characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject
             characterGameObject.transform.SetParent(transform, false);
+        }
+
+        [ServerRpc]
+        public void ChangeCharacterServerRpc(ulong id, string prefabName)
+        {
+
+            string prefabPath = prefabName;
+            GameObject prefab = Resources.Load<GameObject>(prefabPath);
+
+
+            GameObject characterGameObject = Instantiate(prefab);
+            //GameObject HUD = Instantiate(Resources.Load<GameObject>("HUD"));
+
+            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+
+            characterGameObject.transform.SetParent(transform, false);
+            //HUD.transform.SetParent(characterGameObject.transform, false);
+
+
+
         }
     }
 }
