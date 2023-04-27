@@ -20,6 +20,8 @@ namespace Netcode
             GameObject characterGameObject = Instantiate(characterPrefab);
             characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject
             characterGameObject.transform.SetParent(transform, false);
+
+           
         }
     }
 }

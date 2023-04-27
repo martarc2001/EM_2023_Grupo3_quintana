@@ -46,13 +46,13 @@ namespace Movement.Components
 
         void Update()
         {
-            if (!IsOwner) return;
-            UpdateAnimationsServerRpc();
+            if (!IsServer) return;
+            UpdateAnimations();
           
         }
 
-        [ServerRpc]
-        public void UpdateAnimationsServerRpc()
+   
+        public void UpdateAnimations()
         {
             _grounded = Physics2D.OverlapCircle(_feet.position, 0.1f, _floor);
             _animator.SetFloat(AnimatorSpeed, this._direction.magnitude);
