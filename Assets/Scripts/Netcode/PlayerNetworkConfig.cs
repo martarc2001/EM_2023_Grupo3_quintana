@@ -1,4 +1,6 @@
+using UI;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -11,18 +13,44 @@ namespace Netcode
         public override void OnNetworkSpawn()
         {
             if (!IsOwner) return;
-            InstantiateCharacterServerRpc(OwnerClientId);
+            //InstantiateCharacterServerRpc(OwnerClientId);
+
+            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
+            ChangeCharacterServerRpc(OwnerClientId, prefabName);
         }
-    
+
         [ServerRpc]
         public void InstantiateCharacterServerRpc(ulong id)
         {
             GameObject characterGameObject = Instantiate(characterPrefab);
-            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject
+            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject -- NO USAR, INESTABLE
+            //characterGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(id); //Si spawneamos así, el propio jugador es PlayerPrefab pero el resto de clientes los recibe como HuntressPrefab
             characterGameObject.transform.SetParent(transform, false);
 
            
         }
+
+        [ServerRpc]
+        public void ChangeCharacterServerRpc(ulong id, string prefabName) 
+        {
+
+            string prefabPath = prefabName;
+            GameObject prefab = Resources.Load<GameObject>(prefabPath);
+
+            
+            GameObject characterGameObject = Instantiate(prefab);
+            //GameObject HUD = Instantiate(Resources.Load<GameObject>("HUD"));
+
+            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+
+            characterGameObject.transform.SetParent(transform, false);
+            //HUD.transform.SetParent(characterGameObject.transform, false);
+
+
+
+        }
+
+
     }
 }
 
