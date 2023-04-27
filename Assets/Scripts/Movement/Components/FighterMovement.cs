@@ -30,6 +30,11 @@ namespace Movement.Components
         private static readonly int AnimatorHit = Animator.StringToHash("hit");
         private static readonly int AnimatorDie = Animator.StringToHash("die");
 
+
+        //Para optimizar el flip del personaje:
+        private Vector3 dcha = new Vector3(1, 1, 1);
+        private Vector3 izq = new Vector3(-1, 1, 1);
+
         //private NetworkVariable<int> vida;
 
         void Start()
@@ -82,8 +87,6 @@ namespace Movement.Components
 
             bool lookingRight = direction == IMoveableReceiver.Direction.Right;
             _direction = (lookingRight ? 1f : -1f) * speed * Vector3.right;
-            transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1); //localScale positivo: sprite mira a la izq
-                                                                             //localScale negativo: sprite mira a la dcha
 
             FlipCharacterClientRpc(lookingRight);
         }
@@ -91,7 +94,18 @@ namespace Movement.Components
         [ClientRpc]
         public void FlipCharacterClientRpc(bool lookingRight)
         {
+            /*
+            //localScale positivo: sprite mira a la izq
+            //localScale negativo: sprite mira a la dcha
             transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1);
+
+            if (lookingRight) { transform.Find("HUD").localScale = new Vector3(1, 1, 1); }
+            else { transform.Find("HUD").localScale = new Vector3(-1, 1, 1); }
+            */
+
+            transform.localScale = lookingRight ? dcha : izq;
+            transform.Find("HUD").localScale = lookingRight ? dcha : izq;
+
         }
 
 

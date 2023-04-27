@@ -8,10 +8,9 @@ namespace UI
 {
     public class UIHandler : MonoBehaviour
     {
-        public GameObject debugPanel;
-        public Button hostButton;
-        public Button clientButton;
-        public Button serverButton;
+        public GameObject lobbyPanelHost;
+        public GameObject lobbyPanelClient;
+
         public bool hostSelection;
 
         [SerializeField] public GameObject characterSelectionPanel;
@@ -27,11 +26,17 @@ namespace UI
         [SerializeField] private Button huntressButton;
         public string playerSprite;
 
+
+
+        public static UIHandler Instance { get; private set; }
+
         private void Start()
         {
-            hostButton.onClick.AddListener(OnHostButtonClicked);
-            clientButton.onClick.AddListener(OnClientButtonClicked);
-            serverButton.onClick.AddListener(OnServerButtonClicked);
+
+            Instance=this;
+            //hostButton.onClick.AddListener(OnHostButtonClicked);
+            //clientButton.onClick.AddListener(OnClientButtonClicked);
+            
 
             //Name selection
             inputTextBox.onValueChanged.AddListener(characterNameSelected);
@@ -46,31 +51,27 @@ namespace UI
 
         }
 
-        private void OnHostButtonClicked()
+        public void InstantiateHost()
         {
             hostSelection = true;
 
             characterSelectionPanel.SetActive(true);
-            debugPanel.SetActive(false);
-
+            lobbyPanelHost.SetActive(false);
+            lobbyPanelClient.SetActive(false);
             //NetworkManager.Singleton.StartHost();
         }
 
-        private void OnClientButtonClicked()
+        public void InstantiateClient()
         {
             hostSelection = false;
 
             characterSelectionPanel.SetActive(true);
-            debugPanel.SetActive(false);
-
+            lobbyPanelHost.SetActive(false);
+            lobbyPanelClient.SetActive(false);
             //NetworkManager.Singleton.StartClient();
         }
 
-        private void OnServerButtonClicked()
-        {
-            NetworkManager.Singleton.StartServer();
-            debugPanel.SetActive(false);
-        }
+       
 
         private void characterNameSelected(string text)
         {

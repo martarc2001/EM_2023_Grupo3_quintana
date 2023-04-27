@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UI;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
@@ -80,9 +81,10 @@ public class LobbyManager : MonoBehaviour
             if (isPrivate) {
                 InfoLobby.Instance.ShowInfo(lobbyName, joinedLobby.LobbyCode);
             }
-          
+
             //Levantamos el Host al crear la sala
-            NetworkManager.Singleton.StartHost();
+            //NetworkManager.Singleton.StartHost();
+            UIHandler.Instance.InstantiateHost();
         }
         catch(LobbyServiceException e)
         {
@@ -98,7 +100,8 @@ public class LobbyManager : MonoBehaviour
             joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
 
             //Instanciamos un cliente 
-            NetworkManager.Singleton.StartClient();
+            //NetworkManager.Singleton.StartClient();
+            UIHandler.Instance.InstantiateClient();
         }
         catch (LobbyServiceException e)
         {
@@ -115,7 +118,8 @@ public class LobbyManager : MonoBehaviour
 
 
             //Instanciamos un cliente 
-            NetworkManager.Singleton.StartClient();
+            //NetworkManager.Singleton.StartClient();
+            UIHandler.Instance.InstantiateClient();
 
         }
         catch(LobbyServiceException e)
