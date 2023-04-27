@@ -32,6 +32,10 @@ namespace Movement.Components
 
         //private NetworkVariable<int> vida;
 
+        //Para optimizar el flip del personaje:
+        private Vector3 dcha = new Vector3(1, 1, 1);
+        private Vector3 izq = new Vector3(-1, 1, 1);
+
         void Start()
         {
             _rigidbody2D = GetComponent<Rigidbody2D>();
@@ -46,23 +50,23 @@ namespace Movement.Components
 
         void Update()
         {
-            if (!IsOwner) return;
-            UpdateAnimationsServerRpc();
-          
+            if (!IsServer) return;
+            UpdateAnimations();
+
         }
 
-        [ServerRpc]
-        public void UpdateAnimationsServerRpc()
+
+        public void UpdateAnimations()
         {
             _grounded = Physics2D.OverlapCircle(_feet.position, 0.1f, _floor);
             _animator.SetFloat(AnimatorSpeed, this._direction.magnitude);
             _animator.SetFloat(AnimatorVSpeed, this._rigidbody2D.velocity.y);
             _animator.SetBool(AnimatorGrounded, this._grounded);
 
-          
+
         }
 
-       
+
 
         void FixedUpdate()
         {
@@ -81,9 +85,7 @@ namespace Movement.Components
             }
 
             bool lookingRight = direction == IMoveableReceiver.Direction.Right;
-            _direction = (lookingRight ? 1f : -1f) * speed * Vector3.right;
-            transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1); //localScale positivo: sprite mira a la izq
-                                                                             //localScale negativo: sprite mira a la dcha
+            _direction = (lookingRight ? 1f : -1f) * speed * Vector3.right;          
 
             FlipCharacterClientRpc(lookingRight);
         }
@@ -91,7 +93,18 @@ namespace Movement.Components
         [ClientRpc]
         public void FlipCharacterClientRpc(bool lookingRight)
         {
+            /*
+            //localScale positivo: sprite mira a la izq
+            //localScale negativo: sprite mira a la dcha
             transform.localScale = new Vector3(lookingRight ? 1 : -1, 1, 1);
+
+            if (lookingRight) { transform.Find("HUD").localScale = new Vector3(1, 1, 1); }
+            else { transform.Find("HUD").localScale = new Vector3(-1, 1, 1); }
+            */
+
+            transform.localScale = lookingRight ? dcha : izq;
+            transform.Find("HUD").localScale = lookingRight ? dcha : izq;
+
         }
 
 
@@ -112,7 +125,7 @@ namespace Movement.Components
             }
         }
 
-      [ServerRpc]
+        [ServerRpc]
         public void Attack1ServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorAttack1); //AnimatorAttack1 es Animator.StringToHash("attack1"); cacheado  
