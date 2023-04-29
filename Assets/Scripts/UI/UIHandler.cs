@@ -1,3 +1,5 @@
+using TMPro;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,36 +8,90 @@ namespace UI
 {
     public class UIHandler : MonoBehaviour
     {
-   
-        public GameObject debugPanel;
-        public Button hostButton;
-        public Button clientButton;
-        public Button serverButton;
+        public GameObject lobbyPanelHost;
+        public GameObject lobbyPanelClient;
+
+        public bool hostSelection;
+
+        [SerializeField] public GameObject characterSelectionPanel;
+        [SerializeField] public Button initiatonButton;
+
+        //Getting name from text box
+        [SerializeField] private TMP_InputField inputTextBox;
+        public string playerName = "";
+
+        //Sprite selection
+        [SerializeField] private Button akaiKazeButton;
+        [SerializeField] private Button oniButton;
+        [SerializeField] private Button huntressButton;
+        public string playerSprite;
+
+
+
+        public static UIHandler Instance { get; private set; }
 
         private void Start()
         {
-          
-            hostButton.onClick.AddListener(OnHostButtonClicked);
-            clientButton.onClick.AddListener(OnClientButtonClicked);
-            serverButton.onClick.AddListener(OnServerButtonClicked);
+
+            Instance=this;
+            //hostButton.onClick.AddListener(OnHostButtonClicked);
+            //clientButton.onClick.AddListener(OnClientButtonClicked);
+            
+
+            //Name selection
+            inputTextBox.onValueChanged.AddListener(characterNameSelected);
+
+            //Sprite selection
+            akaiKazeButton.onClick.AddListener(() => characterSpriteSelected("Akai Kaze"));
+            oniButton.onClick.AddListener(() => characterSpriteSelected("Oni"));
+            huntressButton.onClick.AddListener(() => characterSpriteSelected("Huntress"));
+
+            initiatonButton.onClick.AddListener(PlayerInitiation);
+
+
         }
 
-        private void OnHostButtonClicked()
+        public void InstantiateHost()
         {
-            NetworkManager.Singleton.StartHost();
-            debugPanel.SetActive(false);
+            hostSelection = true;
+
+            characterSelectionPanel.SetActive(true);
+            lobbyPanelHost.SetActive(false);
+            lobbyPanelClient.SetActive(false);
+            //NetworkManager.Singleton.StartHost();
         }
 
-        private void OnClientButtonClicked()
+        public void InstantiateClient()
         {
-            NetworkManager.Singleton.StartClient();
-            debugPanel.SetActive(false);
+            hostSelection = false;
+
+            characterSelectionPanel.SetActive(true);
+            lobbyPanelHost.SetActive(false);
+            lobbyPanelClient.SetActive(false);
+            //NetworkManager.Singleton.StartClient();
         }
 
-        private void OnServerButtonClicked()
+       
+
+        private void characterNameSelected(string text)
         {
-            NetworkManager.Singleton.StartServer();
-            debugPanel.SetActive(false);
+            playerName = text;
+            if (playerName != "" && playerSprite != "") { initiatonButton.gameObject.SetActive(true); }
+        }
+
+        private void characterSpriteSelected(string buttonPressed)
+        {
+            playerSprite = buttonPressed;
+            if (playerName != "" && playerSprite !="") { initiatonButton.gameObject.SetActive(true); }
+        }
+
+        private void PlayerInitiation()
+        {
+            if(hostSelection) NetworkManager.Singleton.StartHost();
+            else NetworkManager.Singleton.StartClient();
+
+            characterSelectionPanel.SetActive(false);
+
         }
     }
 }

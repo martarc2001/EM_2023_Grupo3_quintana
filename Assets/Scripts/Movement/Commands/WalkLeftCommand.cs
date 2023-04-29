@@ -10,7 +10,7 @@ namespace Movement.Commands
 
         public override void Execute()
         {
-            ((IMoveableReceiver)Client).Move(IMoveableReceiver.Direction.Left);
+            ((IMoveableReceiver)Client).MoveServerRpc(IMoveableReceiver.Direction.Left);
         }
     }
 }

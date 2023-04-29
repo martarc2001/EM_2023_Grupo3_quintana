@@ -1,4 +1,6 @@
+using UI;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
@@ -14,7 +16,10 @@ namespace Netcode
         public override void OnNetworkSpawn()
         {
             if (!IsOwner) return;
-            InstantiateCharacterServerRpc(OwnerClientId);
+            //InstantiateCharacterServerRpc(OwnerClientId);
+
+            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
+            ChangeCharacterServerRpc(OwnerClientId, prefabName);
         }
 
        
@@ -23,38 +28,16 @@ namespace Netcode
         [ServerRpc]
         public void InstantiateCharacterServerRpc(ulong id)
         {
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            players.alivePlayers.Value += 1;
-
-            GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1 = this;
-
-            print("player nuevo! n de players: "+players.alivePlayers.Value);
-            destroyed.Value = false;
-
-
-            if (players.alivePlayers.Value > 1)
-            {
-                life.Value = 80;
-            }
-            else
-            {
-                life.Value = 100;
-            }
-                
-            
 
    
             GameObject characterGameObject = Instantiate(characterPrefab);
-            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject -- NO USAR, INESTABLE
+            //characterGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(id); //Si spawneamos as�, el propio jugador es PlayerPrefab pero el resto de clientes los recibe como HuntressPrefab
             characterGameObject.transform.SetParent(transform, false);
             
 
             //contador
-         
-            players.allPlayers.Add(this);
-     
-          
-           
+
         }
         
         
@@ -116,6 +99,38 @@ namespace Netcode
                 Destroy(this.transform.GetChild(i).gameObject);
             }
 
+           
+        }
+
+        [ServerRpc]
+        public void ChangeCharacterServerRpc(ulong id, string prefabName) 
+        {
+
+            string prefabPath = prefabName;
+            GameObject prefab = Resources.Load<GameObject>(prefabPath);
+
+            
+            GameObject characterGameObject = Instantiate(prefab);
+            //GameObject HUD = Instantiate(Resources.Load<GameObject>("HUD"));
+
+            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+
+            characterGameObject.transform.SetParent(transform, false);
+            //HUD.transform.SetParent(characterGameObject.transform, false);
+            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+            players.alivePlayers.Value += 1;
+
+            GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1 = this;
+
+            print("player nuevo! n de players: "+players.alivePlayers.Value);
+            destroyed.Value = false;
+
+
+           
+            life.Value = 100;
+            
+            
+            players.allPlayers.Add(this);
 
         }
 

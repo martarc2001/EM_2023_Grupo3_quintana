@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2629072033587473433}
   - component: {fileID: 2629072033587473414}
   - component: {fileID: 2629072033587473432}
+  - component: {fileID: 2401159276521016257}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -61,8 +62,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66a106a55342f094f8ddaecd816ba24d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  life:
-    m_InternalValue: 0
   characterPrefab: {fileID: 3010630682321582541, guid: 06b98e5343c113147985cd4116ac1cdb, type: 3}
-  msjGanar: {fileID: 2629072033587473415}
-  mjPerder: {fileID: 0}
+--- !u!114 &2401159276521016257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2629072033587473415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68992d55c43c96c4d90da84ffa66ec4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AkaiKazePrefab: {fileID: 0}
+  OniPrefab: {fileID: 0}
+  HuntressPrefab: {fileID: 0}
