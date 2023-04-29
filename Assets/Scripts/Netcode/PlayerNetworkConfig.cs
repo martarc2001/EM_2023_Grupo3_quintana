@@ -2,6 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace Netcode
 {
@@ -30,13 +31,17 @@ namespace Netcode
             print("player nuevo! n de players: "+players.alivePlayers.Value);
             destroyed.Value = false;
 
+
             if (players.alivePlayers.Value > 1)
             {
-                life.Value = 2;
+                life.Value = 80;
             }
-            else {
+            else
+            {
                 life.Value = 100;
             }
+                
+            
 
    
             GameObject characterGameObject = Instantiate(characterPrefab);
@@ -58,7 +63,8 @@ namespace Netcode
         {
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             //METODO EN EL QUE SE RECORREN LOS JUGADORES Y SE PONE UN FLAG O ALGO EN EL CASO DE QUE HAYAN MUERTO
-            life.Value = 0;
+            life.Value -=10;
+            print("vida: " + life.Value);
             if (life.Value <= 0)
             {
                 players.alivePlayers.Value -= 1;
@@ -69,10 +75,19 @@ namespace Netcode
            if (players.alivePlayers.Value == 1)
             {
                 print("win! ");
-              checkWinClientRpc(false);
+                StartCoroutine(Order());
             }
    
         }
+
+        IEnumerator Order()
+        {
+            print("corrutina de ganar---");
+            yield return new WaitForSeconds(3.0f);
+           checkWinClientRpc(false);
+        }
+
+
         [ServerRpc]
         public void DestroyCharacterServerRpc()
         {
@@ -119,7 +134,7 @@ namespace Netcode
             else
             {
 
-                if (destroyed.Value == false)
+                if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
                 {
                     print("has gabnado");
 

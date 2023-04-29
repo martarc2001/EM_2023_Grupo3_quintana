@@ -46,9 +46,14 @@ public class ConnectedPlayers : NetworkBehaviour
     void Update()
     {
 
-        counterServerRpc();
+        
     }
 
+    private void FixedUpdate()
+    {
+        counterServerRpc();
+
+    }
     [ServerRpc(RequireOwnership = false)]
     public void counterServerRpc()
     {
@@ -88,8 +93,9 @@ public class ConnectedPlayers : NetworkBehaviour
         else
         {
 
-          
-                //SI TIENE MENOS VIDA QUE EL GANADOR
+
+            //SI TIENE MENOS VIDA QUE EL GANADOR
+            print(player1.life.Value);
 
                 if (player1.life.Value != winningLife)
                 {
@@ -112,14 +118,19 @@ public class ConnectedPlayers : NetworkBehaviour
             }
 
             //mostrar si han ganado o no
-            player1.checkWinClientRpc(false);
+            StartCoroutine(Order());
         }
     }
-   
-  
+
+    IEnumerator Order()
+    {
+      
+        yield return new WaitForSeconds(3.0f);
+        player1.checkWinClientRpc(false);
+    }
 
 
- 
+
 
     public void showGanar()
     {

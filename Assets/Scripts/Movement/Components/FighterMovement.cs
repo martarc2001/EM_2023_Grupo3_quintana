@@ -107,9 +107,9 @@ namespace Movement.Components
         
             if (IsOwner)
             {
-                print("takehit");
+               
                 _networkAnimator.SetTrigger(AnimatorHit);
-                print(player);
+              
                 player.checkLife();
             }
                
