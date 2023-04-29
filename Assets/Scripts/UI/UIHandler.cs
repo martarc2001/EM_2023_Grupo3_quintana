@@ -10,6 +10,7 @@ namespace UI
         public Button hostButton;
         public Button clientButton;
         public Button serverButton;
+        public Image vida;
 
         private void Start()
         {
@@ -34,6 +35,11 @@ namespace UI
         {
             NetworkManager.Singleton.StartServer();
             debugPanel.SetActive(false);
+        }
+
+        private void UpdateLife()
+        {
+
         }
     }
 }

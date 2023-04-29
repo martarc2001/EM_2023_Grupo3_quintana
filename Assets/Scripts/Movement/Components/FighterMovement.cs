@@ -19,6 +19,10 @@ namespace Movement.Components
         private Transform _feet;
         private LayerMask _floor;
 
+        ///Nuevo
+        public HealthBar barraDeVida;
+        ///
+
         private Vector3 _direction = Vector3.zero;
         private bool _grounded = true;
 
@@ -30,7 +34,7 @@ namespace Movement.Components
         private static readonly int AnimatorHit = Animator.StringToHash("hit");
         private static readonly int AnimatorDie = Animator.StringToHash("die");
 
-        //private NetworkVariable<int> vida;
+        private NetworkVariable<int> vida;
 
         void Start()
         {
@@ -41,7 +45,13 @@ namespace Movement.Components
             _feet = transform.Find("Feet");
             _floor = LayerMask.GetMask("Floor");
 
-            //vida = new NetworkVariable<int>(10);
+            vida = new NetworkVariable<int>(100);
+            barraDeVida = GetComponent<HealthBar>();
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
         }
 
         void Update()
@@ -102,7 +112,7 @@ namespace Movement.Components
         public void TakeHit()
         {
             _networkAnimator.SetTrigger(AnimatorHit);
-            //vida.Value-=1;
+            vida.Value-=20;
         }
 
         public void Die()

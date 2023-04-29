@@ -26,6 +26,7 @@ namespace Systems
         public InputAction Jump;
         public InputAction Attack1;
         public InputAction Attack2;
+        public InputAction Space;
 
         private Dictionary<string, ICommand> _commands;
 
@@ -44,6 +45,13 @@ namespace Systems
             {
                 SetCharacter(_character);
             }
+
+            /*Space.started += context =>
+            {
+                Debug.Log("Espacio Pulsado");
+
+            };
+            Space.Enable();*/
         }
 
         public void SetCharacter(FighterMovement character)
