@@ -10,7 +10,7 @@ namespace Movement.Commands
 
         public override void Execute()
         {
-            ((IJumperReceiver)Client).Jump(IJumperReceiver.JumpStage.Landing);
+            ((IJumperReceiver)Client).JumpServerRpc(IJumperReceiver.JumpStage.Landing);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Movement.Commands
 
         public override void Execute()
         {
-            Client.Attack1();
+            Client.Attack1ServerRpc();
         }
     }
 }

@@ -9,6 +9,6 @@ namespace Movement.Components
 			Left,
 		}
 
-		public void Move(Direction direction);
+		public void MoveServerRpc(Direction direction);
 	}
 }

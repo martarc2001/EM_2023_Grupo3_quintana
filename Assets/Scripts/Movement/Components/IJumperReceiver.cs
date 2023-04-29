@@ -8,6 +8,6 @@ namespace Movement.Components
 			Landing
 		}
 
-		public void Jump(JumpStage stage);
+		public void JumpServerRpc(JumpStage stage);
 	}
 }
