@@ -28,7 +28,7 @@ public class ConnectedPlayers : NetworkBehaviour
     private void Awake()
     {
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 5;
+        seconds = 35;
 
         imgEmpate = GameObject.Find("empate");
         imgPerder = GameObject.Find("NewCanvas6");
@@ -51,7 +51,11 @@ public class ConnectedPlayers : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        counterServerRpc();
+        if (allPlayers.Count > 1)
+        {
+            counterServerRpc();
+        }
+        
 
     }
     [ServerRpc(RequireOwnership = false)]
