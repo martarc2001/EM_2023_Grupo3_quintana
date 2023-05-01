@@ -77,43 +77,40 @@ public class ConnectedPlayers : NetworkBehaviour
             }
         }     
     }
-    
 
     [ServerRpc]
     public void endServerRpc()
     {
-       
-        
+
+
         allPlayers.Sort(sortplayers);
-        int winningLife = allPlayers[allPlayers.Count-1].life.Value;
+        int winningLife = allPlayers[allPlayers.Count - 1].life.Value;
         int loosingLife = allPlayers[0].life.Value;
-        print("ganador:"+ winningLife);
+        print("ganador:" + winningLife);
 
         //EMPATE
         if (winningLife == loosingLife)
         {
             print("A");
-          player1.checkWinClientRpc(true);
+            player1.checkWinClientRpc(true);
         }
         else
         {
 
+            for (int i = 0; i <= allPlayers.Count - 1; i++)
+            {
+                print(allPlayers[i].life.Value);
+                //SI TIENE MENOS VIDA QUE EL GANADOR
 
-            //SI TIENE MENOS VIDA QUE EL GANADOR
-            print(player1.life.Value);
-
-                if (player1.life.Value != winningLife)
+                if (allPlayers[i].life.Value != winningLife)
                 {
-                    print(player1.life.Value+" personaje:  "+player1);
+                    print(allPlayers[i].life.Value + " personaje:  " + allPlayers[0]);
                     alivePlayers.Value -= 1;
-                    print(alivePlayers.Value);
 
-                        player1.DestroyCharacter( allPlayers[allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform );
-
-                     print(player1);
-                     print(player1.destroyed.Value);
+                    allPlayers[i].DestroyCharacter(allPlayers[allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform);
 
                 }
+            }
 
             //mostrar si han ganado o no
             StartCoroutine(Order());
