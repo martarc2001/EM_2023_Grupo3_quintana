@@ -66,7 +66,7 @@ public class ConnectedPlayers : NetworkBehaviour
             if (seconds > 0)
             {
                 seconds -= Time.deltaTime;
-                print(seconds);
+              
             }
             else
             {
@@ -97,28 +97,18 @@ public class ConnectedPlayers : NetworkBehaviour
         else
         {
 
-
-            //SI TIENE MENOS VIDA QUE EL GANADOR
-            print(player1.life.Value);
-
-                if (player1.life.Value != winningLife)
+            for(int i=0;i<=allPlayers.Count-1; i++) { 
+       
+            print(allPlayers[i].life.Value);
+                //SI TIENE MENOS VIDA QUE EL GANADOR
+                if (allPlayers[i].life.Value != winningLife)
                 {
-                    print(player1.life.Value+" personaje:  "+player1);
+                    print(allPlayers[i].life.Value + " personaje:  "+allPlayers[0]);
                     alivePlayers.Value -= 1;
-                    print(alivePlayers.Value);
-                
-                
-                       
-                        player1.DestroyCharacter();
 
-                     print(player1);
-                     print(player1.destroyed.Value);
-                    
+                     allPlayers[i].DestroyCharacter();
 
-                //SI TIENE LA MISMA VIDA PERO NO ES EL GANADOR =VARIOS GANADORES
-                //if (p.life.Value == winningLife && p != allPlayers[allPlayers.Count - 1])
-                // {
-                // }
+                 }
             }
 
             //mostrar si han ganado o no
