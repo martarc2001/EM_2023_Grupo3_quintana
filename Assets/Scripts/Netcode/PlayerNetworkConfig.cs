@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using Cinemachine;
 
 namespace Netcode
 {
@@ -44,22 +45,43 @@ namespace Netcode
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
         {
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            //METODO EN EL QUE SE RECORREN LOS JUGADORES Y SE PONE UN FLAG O ALGO EN EL CASO DE QUE HAYAN MUERTO
-            life.Value -=10;
+           
+            life.Value -=50;
             print("vida: " + life.Value);
+
             if (life.Value <= 0)
             {
+
+                var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+
                 players.alivePlayers.Value -= 1;
                 destroyed.Value = true;
-                DestroyCharacter();
-            }
 
-           if (players.alivePlayers.Value == 1)
-            {
+                //BUSCAR UNO VIVO Y PASARLE LA TRANSFORMADA A DESTROYCHARACTER
+                PlayerNetworkConfig randomPlayer;
+                do
+                {
+                  
+                    randomPlayer = players.allPlayers[Random.Range(0, players.allPlayers.Count)];
+
+                } while (randomPlayer.life.Value <= 0);
+
+               
+                Transform a = randomPlayer.GetComponentInChildren<Netcode.FighterNetworkConfig>().transform;
+                DestroyCharacter(a);
+
+
+                if (players.alivePlayers.Value == 1)
+                {
                 print("win! ");
                 StartCoroutine(Order());
+                   
+
+                }  
             }
+
+
+
    
         }
 
@@ -71,35 +93,27 @@ namespace Netcode
         }
 
 
-        [ServerRpc]
-        public void DestroyCharacterServerRpc()
-        {
-            print("E");
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-             
-
-                for (var i = this.transform.childCount - 1; i >= 0; i--)
-                {
-
-                    Destroy(this.transform.GetChild(i).gameObject);
-                }
-            
-            
-        }
-        public void DestroyCharacter()
+ 
+        public void DestroyCharacter(Transform t )
         {
             destroyed.Value = true;
             print("ESS");
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-
-
+            try { 
+            ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+            virtualCamera.Follow = t;
+            }catch(System.Exception ex)
+            {
+                print(ex);
+            }
             for (var i = this.transform.childCount - 1; i >= 0; i--)
             {
                 print("child");
                 Destroy(this.transform.GetChild(i).gameObject);
             }
-
            
+
+
         }
 
         [ServerRpc]

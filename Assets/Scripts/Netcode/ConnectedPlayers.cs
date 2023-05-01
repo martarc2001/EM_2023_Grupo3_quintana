@@ -28,8 +28,8 @@ public class ConnectedPlayers : NetworkBehaviour
     private void Awake()
     {
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 35;
-
+        seconds = 16;
+        
         imgEmpate = GameObject.Find("empate");
         imgPerder = GameObject.Find("NewCanvas6");
         imgGanar = GameObject.Find("NewCanvasganado");
@@ -51,13 +51,14 @@ public class ConnectedPlayers : NetworkBehaviour
 
     private void FixedUpdate()
     {
+
         if (allPlayers.Count > 1)
         {
             counterServerRpc();
         }
-        
-
+     
     }
+
     [ServerRpc(RequireOwnership = false)]
     public void counterServerRpc()
     {
@@ -66,7 +67,7 @@ public class ConnectedPlayers : NetworkBehaviour
             if (seconds > 0)
             {
                 seconds -= Time.deltaTime;
-                print(seconds);
+               
             }
             else
             {
@@ -106,20 +107,13 @@ public class ConnectedPlayers : NetworkBehaviour
                     print(player1.life.Value+" personaje:  "+player1);
                     alivePlayers.Value -= 1;
                     print(alivePlayers.Value);
-                
-                
-                       
-                        player1.DestroyCharacter();
+
+                        player1.DestroyCharacter( allPlayers[allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform );
 
                      print(player1);
                      print(player1.destroyed.Value);
-                    
 
-                //SI TIENE LA MISMA VIDA PERO NO ES EL GANADOR =VARIOS GANADORES
-                //if (p.life.Value == winningLife && p != allPlayers[allPlayers.Count - 1])
-                // {
-                // }
-            }
+                }
 
             //mostrar si han ganado o no
             StartCoroutine(Order());
