@@ -68,6 +68,7 @@ public class ConnectedPlayers : NetworkBehaviour
             {
                 seconds -= Time.deltaTime;
                
+              
             }
             else
             {

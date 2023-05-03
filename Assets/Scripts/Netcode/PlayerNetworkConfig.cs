@@ -112,9 +112,7 @@ namespace Netcode
                 Destroy(this.transform.GetChild(i).gameObject);
             }
            
-
-
-        }
+        } 
 
         [ServerRpc]
         public void ChangeCharacterServerRpc(ulong id, string prefabName) 
@@ -131,10 +129,12 @@ namespace Netcode
 
             characterGameObject.transform.SetParent(transform, false);
             //HUD.transform.SetParent(characterGameObject.transform, false);
+
+
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             players.alivePlayers.Value += 1;
 
-            GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1 = this;
+           players.player1 = this;
 
             print("player nuevo! n de players: "+players.alivePlayers.Value);
             destroyed.Value = false;
@@ -145,7 +145,8 @@ namespace Netcode
             
             
             players.allPlayers.Add(this);
-
+            print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1);
+            print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
         }
 
         [ClientRpc]
