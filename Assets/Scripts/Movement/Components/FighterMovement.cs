@@ -20,7 +20,7 @@ namespace Movement.Components
         private LayerMask _floor;
 
         ///Nuevo
-        public HealthBar barraDeVida;
+        //public HealthBar barraDeVida;
         ///
 
         private Vector3 _direction = Vector3.zero;
@@ -35,7 +35,7 @@ namespace Movement.Components
         private static readonly int AnimatorDie = Animator.StringToHash("die");
 
 
-        private NetworkVariable<int> vida;
+        //private NetworkVariable<int> vida;
 
 
         //Para optimizar el flip del personaje:
@@ -54,8 +54,8 @@ namespace Movement.Components
             _feet = transform.Find("Feet");
             _floor = LayerMask.GetMask("Floor");
 
-            vida = new NetworkVariable<int>(100);
-            barraDeVida = GetComponent<HealthBar>();
+            //vida = new NetworkVariable<int>(100);
+            //barraDeVida = GetComponent<HealthBar>();
         }
 
         public override void OnNetworkSpawn()
@@ -159,7 +159,7 @@ namespace Movement.Components
         {
             _networkAnimator.SetTrigger(AnimatorHit);
 
-            vida.Value-=20;
+            //vida.Value-=20;
 
             Debug.Log("Takehit");
             //vida.Value-=1;

@@ -15681,7 +15681,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1389431229}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.8608799, y: 0.48484346, z: -10.063926}
+  m_LocalPosition: {x: 3.5453463, y: 0.48484418, z: -10.063926}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18346,6 +18346,14 @@ PrefabInstance:
     - target: {fileID: 7909192859141269000, guid: cb181b31953c5db4fbbee5399d4b73e8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7909192859141269002, guid: cb181b31953c5db4fbbee5399d4b73e8, type: 3}
+      propertyPath: Space.m_Id
+      value: ad77e8f5-caf5-45e2-a43e-23b766356dd2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7909192859141269002, guid: cb181b31953c5db4fbbee5399d4b73e8, type: 3}
+      propertyPath: Space.m_Name
+      value: Space
       objectReference: {fileID: 0}
     - target: {fileID: 7909192859141269002, guid: cb181b31953c5db4fbbee5399d4b73e8, type: 3}
       propertyPath: Attack1.m_SingletonActionBindings.Array.size

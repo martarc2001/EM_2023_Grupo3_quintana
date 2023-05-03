@@ -9,7 +9,7 @@ namespace UI
     public class UIHandler : MonoBehaviour
     {
 
-        public Image vida;
+        //public Image vida;
 
         public GameObject lobbyPanelHost;
         public GameObject lobbyPanelClient;

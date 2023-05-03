@@ -11,12 +11,14 @@ public class PlayerAttributes : NetworkBehaviour
     //Vida
     const int MAX_HP = 100;
     NetworkVariable<int> HP = new NetworkVariable<int>(MAX_HP);
+    [SerializeField] private GameObject healthBar;
 
     //Nombre y sprite  
     string playerName;
     [SerializeField] private GameObject AkaiKazePrefab;
     [SerializeField] private GameObject OniPrefab;
     [SerializeField] private GameObject HuntressPrefab;
+
 
 
     void Start()
@@ -45,7 +47,7 @@ public class PlayerAttributes : NetworkBehaviour
     [ClientRpc]
     void ChangeInitialSettingsClientRpc(string playerName)
     {
-        transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName; //Changing the name on prefab only
+        transform.GetChild(0).Find("HUD").Find("Name").Find("HealthBar").GetComponent<TextMeshPro>().text = playerName; //Changing the name on prefab only
         
     }
 
