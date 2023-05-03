@@ -24,7 +24,7 @@ public class PlayerAttributes : NetworkBehaviour
         //El owner del objeto avisa al servidor del nombre que ha escogido
         if (IsOwner)
         {
-            string nameInInputText = GameObject.Find("UI").GetComponent<UIHandler>().playerName;
+            string nameInInputText =   GameObject.Find("UI").GetComponent<UIHandler>().playerName;
             ChangeInitialSettingsServerRpc(nameInInputText);
             GetSettingsFromPreviousPlayersServerRpc();
 
