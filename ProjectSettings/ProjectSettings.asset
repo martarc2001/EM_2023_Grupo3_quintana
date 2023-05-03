@@ -135,7 +135,8 @@ PlayerSettings:
     16:9: 1
     Others: 1
   bundleVersion: 1.0
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: 11400000, guid: 8af01114157c01147a9096c4d89006b3, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -818,11 +819,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 1
-  cloudProjectId: 6728853d-7996-41ed-85e0-4fc264c3f1ba
+  cloudProjectId: 1c320fcf-a6aa-4bdd-a0cf-6550fc2358ad
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Entornos_Multijugador
-  organizationId: marianojesus27
+  projectName: pusi
+  organizationId: elenalopez
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 

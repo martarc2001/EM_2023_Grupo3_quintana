@@ -3,6 +3,7 @@ using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+
 namespace Movement.Components
 {
     [RequireComponent(typeof(Rigidbody2D)),
@@ -26,6 +27,8 @@ namespace Movement.Components
         private Vector3 _direction = Vector3.zero;
         private bool _grounded = true;
 
+        private Netcode.FighterNetworkConfig player;
+
         private static readonly int AnimatorSpeed = Animator.StringToHash("speed");
         private static readonly int AnimatorVSpeed = Animator.StringToHash("vspeed");
         private static readonly int AnimatorGrounded = Animator.StringToHash("grounded");
@@ -47,6 +50,8 @@ namespace Movement.Components
 
         void Start()
         {
+            player = GetComponent<Netcode.FighterNetworkConfig>();
+            print(player);
             _rigidbody2D = GetComponent<Rigidbody2D>();
             _animator = GetComponent<Animator>();
             _networkAnimator = GetComponent<NetworkAnimator>();
@@ -126,6 +131,8 @@ namespace Movement.Components
         [ServerRpc]
         public void JumpServerRpc(IJumperReceiver.JumpStage stage)
         {
+          
+            
             switch (stage)
             {
                 case IJumperReceiver.JumpStage.Jumping:
@@ -138,6 +145,7 @@ namespace Movement.Components
                 case IJumperReceiver.JumpStage.Landing:
                     break;
             }
+         
         }
 
       [ServerRpc]
@@ -157,12 +165,15 @@ namespace Movement.Components
         //Este metodo no es serverRPC porque al llamar a los ataques desde el servidor, también ejecuta el OnCollider de Weapon y en caso de que colisione, llamaría a TakeHit
         public void TakeHit()
         {
-            _networkAnimator.SetTrigger(AnimatorHit);
-
-            //vida.Value-=20;
-
-            Debug.Log("Takehit");
-            //vida.Value-=1;
+        
+            if (IsOwner)
+            {
+               
+                _networkAnimator.SetTrigger(AnimatorHit);
+              
+                player.checkLife();
+            }
+               
 
         }
 
@@ -172,5 +183,10 @@ namespace Movement.Components
             _networkAnimator.SetTrigger(AnimatorDie);
             Debug.Log("Takehit");
         }
+
+       
     }
+
+
+
 }
