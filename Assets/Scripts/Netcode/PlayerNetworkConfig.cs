@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using Cinemachine;
+using TMPro;
 
 namespace Netcode
 {
@@ -73,8 +74,10 @@ namespace Netcode
 
                 if (players.alivePlayers.Value == 1)
                 {
-                print("win! ");
-                StartCoroutine(Order());
+                    
+                    print("win! ");
+                   
+                  StartCoroutine(Order());
                    
 
                 }  
@@ -99,18 +102,24 @@ namespace Netcode
             destroyed.Value = true;
             print("ESS");
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            try { 
-            ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+            try {
+
+
+                ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
             virtualCamera.Follow = t;
-            }catch(System.Exception ex)
-            {
-                print(ex);
-            }
+
             for (var i = this.transform.childCount - 1; i >= 0; i--)
             {
                 print("child");
                 Destroy(this.transform.GetChild(i).gameObject);
             }
+
+            }
+            catch(System.Exception ex)
+            {
+                print(ex);
+            }
+          
            
         } 
 
@@ -152,9 +161,11 @@ namespace Netcode
         [ClientRpc]
         public void checkWinClientRpc(bool tie)
         {
+           
             print(this);
             print(destroyed.Value);
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+            players.showWinner();
             //tie es true cuando ha quedado mas de un personaje vivo
 
             if (tie)
@@ -163,9 +174,13 @@ namespace Netcode
             }
             else
             {
+                
 
                 if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
                 {
+                    GameObject name = GameObject.Find("Name");
+                    players.WinText.text = "¡" + GameObject.Find("Name").GetComponent<TextMeshPro>().text + " wins!";
+
                     print("has gabnado");
 
                     players.showGanar();

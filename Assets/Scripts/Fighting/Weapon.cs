@@ -12,6 +12,7 @@ namespace Fighting
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
+            print("the collision is collisioning");
             GameObject otherObject = collision.gameObject;
             // Debug.Log($"Sword collision with {otherObject.name}");
 

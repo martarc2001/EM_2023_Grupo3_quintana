@@ -2,14 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-
+using TMPro;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
     public NetworkVariable<int> alivePlayers;
     public NetworkVariable<bool> end;
     public Netcode.PlayerNetworkConfig player1;
-
+    public GameObject winner;
+    public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
     public GameObject imgGanar;
     public GameObject imgPerder;
@@ -28,8 +29,12 @@ public class ConnectedPlayers : NetworkBehaviour
     private void Awake()
     {
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 16;
-        
+        seconds = 36000;
+
+
+       WinText = winner.GetComponent<TextMeshProUGUI>();
+        WinText.text = "bjdfsbwei";
+   
         imgEmpate = GameObject.Find("empate");
         imgPerder = GameObject.Find("NewCanvas6");
         imgGanar = GameObject.Find("NewCanvasganado");
@@ -112,7 +117,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
                 }
             }
-
+            showWinner();
             //mostrar si han ganado o no
             StartCoroutine(Order());
         }
@@ -139,5 +144,11 @@ public class ConnectedPlayers : NetworkBehaviour
     public void showEmpate()
     {
         imgEmpate.SetActive(true);
+    }
+    public void showWinner()
+    {
+        allPlayers.Sort(sortplayers);
+        Netcode.PlayerNetworkConfig winner= allPlayers[allPlayers.Count - 1];
+        WinText.text = "¡" + winner.GetComponentInChildren<TextMeshPro>().text + " wins!";
     }
 }
