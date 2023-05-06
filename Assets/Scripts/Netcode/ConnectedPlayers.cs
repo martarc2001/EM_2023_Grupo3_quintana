@@ -36,7 +36,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
 
        WinText = winner.GetComponent<TextMeshProUGUI>();
-        WinText.text = "bjdfsbwei";
+        WinText.text = "";
    
         imgEmpate = GameObject.Find("empate");
         imgPerder = GameObject.Find("NewCanvas6");
