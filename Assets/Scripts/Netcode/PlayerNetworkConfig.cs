@@ -36,14 +36,12 @@ namespace Netcode
             characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject -- NO USAR, INESTABLE
             //characterGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(id); //Si spawneamos as�, el propio jugador es PlayerPrefab pero el resto de clientes los recibe como HuntressPrefab
             characterGameObject.transform.SetParent(transform, false);
-            
 
-            //contador
 
         }
         
         
-        [ServerRpc(RequireOwnership = false)]
+        [ServerRpc (RequireOwnership =false)]
         public void checkLifeServerRpc()
         {
            
@@ -76,8 +74,9 @@ namespace Netcode
                 {
                     
                     print("win! ");
-                   
-                  StartCoroutine(Order());
+                    //para calcular quién ha ganado se mira qué jugador queda con mayor vida y se coloca en un networkvariable
+                    players.calculateWinner();
+                    StartCoroutine(Order());
                    
 
                 }  
@@ -90,18 +89,22 @@ namespace Netcode
 
         IEnumerator Order()
         {
+           
             print("corrutina de ganar---");
             yield return new WaitForSeconds(3.0f);
-           checkWinClientRpc(false);
+            
+            checkWinClientRpc(false);
+              
         }
 
 
  
         public void DestroyCharacter(Transform t )
         {
-            destroyed.Value = true;
+
             print("ESS");
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+           
             try {
 
 
@@ -143,7 +146,7 @@ namespace Netcode
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             players.alivePlayers.Value += 1;
 
-           players.player1 = this;
+              players.player1 = this;
 
             print("player nuevo! n de players: "+players.alivePlayers.Value);
             destroyed.Value = false;
@@ -154,6 +157,7 @@ namespace Netcode
             
             
             players.allPlayers.Add(this);
+    
             print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1);
             print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
         }
@@ -161,11 +165,11 @@ namespace Netcode
         [ClientRpc]
         public void checkWinClientRpc(bool tie)
         {
-           
-            print(this);
-            print(destroyed.Value);
+                  
+
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            players.showWinner();
+           
+
             //tie es true cuando ha quedado mas de un personaje vivo
 
             if (tie)
@@ -174,12 +178,12 @@ namespace Netcode
             }
             else
             {
-                
 
+                players.showWinnerClientRpc();
+                // WinText.text = "¡" + winnerName + " wins!";
                 if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
                 {
-                    GameObject name = GameObject.Find("Name");
-                    players.WinText.text = "¡" + GameObject.Find("Name").GetComponent<TextMeshPro>().text + " wins!";
+           
 
                     print("has gabnado");
 

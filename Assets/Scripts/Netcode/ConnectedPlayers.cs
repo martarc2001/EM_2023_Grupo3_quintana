@@ -3,25 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using TMPro;
+using Unity.Collections;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
     public NetworkVariable<int> alivePlayers;
     public NetworkVariable<bool> end;
+    NetworkVariable<FixedString32Bytes> winnerName;
+
     public Netcode.PlayerNetworkConfig player1;
     public GameObject winner;
     public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
+ 
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
     public float seconds;
     public bool start;
 
-    void Start()
-    {
-        
-    }
+    
+
+  
     private int sortplayers(Netcode.PlayerNetworkConfig p1, Netcode.PlayerNetworkConfig p2)
     {
         return p1.life.Value.CompareTo(p2.life.Value);
@@ -29,7 +32,7 @@ public class ConnectedPlayers : NetworkBehaviour
     private void Awake()
     {
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 36000;
+        seconds = 2000;
 
 
        WinText = winner.GetComponent<TextMeshProUGUI>();
@@ -44,6 +47,7 @@ public class ConnectedPlayers : NetworkBehaviour
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
+        winnerName = new NetworkVariable<FixedString32Bytes>();
 
     }
 
@@ -117,9 +121,12 @@ public class ConnectedPlayers : NetworkBehaviour
 
                 }
             }
-            showWinner();
+            Netcode.PlayerNetworkConfig winner =allPlayers[allPlayers.Count-1];
+            winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
+            
             //mostrar si han ganado o no
             StartCoroutine(Order());
+           
         }
     }
 
@@ -129,8 +136,14 @@ public class ConnectedPlayers : NetworkBehaviour
         yield return new WaitForSeconds(3.0f);
         player1.checkWinClientRpc(false);
     }
+    //metodo que calcula el ganador
+    public void calculateWinner()
+    {
 
-
+        allPlayers.Sort(sortplayers);
+        Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];
+        winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
+    }
 
 
     public void showGanar()
@@ -145,10 +158,13 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         imgEmpate.SetActive(true);
     }
-    public void showWinner()
+   
+    //metodo que muestra a todos los clientes el ganador
+    [ClientRpc]
+    public void showWinnerClientRpc()
     {
-        allPlayers.Sort(sortplayers);
-        Netcode.PlayerNetworkConfig winner= allPlayers[allPlayers.Count - 1];
-        WinText.text = "¡" + winner.GetComponentInChildren<TextMeshPro>().text + " wins!";
+
+        WinText.text = "¡"+winnerName.Value.ToString()+" wins!";
+       
     }
 }
