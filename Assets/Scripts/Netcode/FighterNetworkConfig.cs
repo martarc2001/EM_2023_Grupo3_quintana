@@ -26,7 +26,7 @@ namespace Netcode
            
          
             this.gameObject.GetComponentInParent<Netcode.PlayerNetworkConfig>().checkLifeServerRpc();
-           
+            //this.gameObject.GetComponentInParent<PlayerAttributes>().
         }
     }
 }

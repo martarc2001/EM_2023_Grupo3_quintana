@@ -46,12 +46,6 @@ namespace Systems
                 SetCharacter(_character);
             }
 
-            /*Space.started += context =>
-            {
-                Debug.Log("Espacio Pulsado");
-
-            };
-            Space.Enable();*/
         }
 
         public void SetCharacter(FighterMovement character)

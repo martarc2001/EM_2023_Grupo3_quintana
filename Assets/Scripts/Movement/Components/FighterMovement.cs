@@ -165,16 +165,9 @@ namespace Movement.Components
         //Este metodo no es serverRPC porque al llamar a los ataques desde el servidor, también ejecuta el OnCollider de Weapon y en caso de que colisione, llamaría a TakeHit
         public void TakeHit()
         {
-        
-            if (IsOwner)
-            {
-               
-                _networkAnimator.SetTrigger(AnimatorHit);
+            _networkAnimator.SetTrigger(AnimatorHit);
               
-                player.checkLife();
-            }
-               
-
+            player.checkLife();   
         }
 
         [ServerRpc]

@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using Cinemachine;
+using UnityEngine.UI;
 
 namespace Netcode
 {
@@ -46,8 +47,10 @@ namespace Netcode
         public void checkLifeServerRpc()
         {
            
-            life.Value -=50;
+            life.Value -=20;
             print("vida: " + life.Value);
+            //transform.GetChild(0).Find("HUD").Find("HealthBar").Find("Green").GetComponent<Image>().fillAmount = life.Value / 100f;
+            checkHealthBarClientRpc();
 
             if (life.Value <= 0)
             {
@@ -80,9 +83,6 @@ namespace Netcode
                 }  
             }
 
-
-
-   
         }
 
         IEnumerator Order()
@@ -176,7 +176,11 @@ namespace Netcode
                     players.showPerder();
                 }
             }
-
+        }
+        [ClientRpc]
+        public void checkHealthBarClientRpc()
+        {
+            transform.GetChild(0).Find("HUD").Find("HealthBar").Find("Green").GetComponent<Image>().fillAmount = life.Value / 100f;
         }
 
 
