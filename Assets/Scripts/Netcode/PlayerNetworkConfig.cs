@@ -54,7 +54,7 @@ namespace Netcode
             if (life.Value <= 0)
             {
 
-                var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+                
 
                 players.alivePlayers.Value -= 1;
                
@@ -145,6 +145,7 @@ namespace Netcode
                         randomPlayer = players.allPlayers[Random.Range(0, players.allPlayers.Count)];
 
                     } while (randomPlayer.life.Value <= 0);
+
                   a = randomPlayer.GetComponentInChildren<Netcode.FighterNetworkConfig>().transform;
                     ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
                     virtualCamera.Follow = a;
