@@ -117,7 +117,7 @@ public class ConnectedPlayers : NetworkBehaviour
                     print(allPlayers[i].life.Value + " personaje:  " + allPlayers[0]);
                     alivePlayers.Value -= 1;
 
-                    allPlayers[i].DestroyCharacter(allPlayers[allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform);
+                    allPlayers[i].DestroyCharacter(true);
 
                 }
             }

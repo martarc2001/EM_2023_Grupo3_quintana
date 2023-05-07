@@ -54,20 +54,10 @@ namespace Netcode
                 var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
 
                 players.alivePlayers.Value -= 1;
-                destroyed.Value = true;
-
-                //BUSCAR UNO VIVO Y PASARLE LA TRANSFORMADA A DESTROYCHARACTER
-                PlayerNetworkConfig randomPlayer;
-                do
-                {
-                  
-                    randomPlayer = players.allPlayers[Random.Range(0, players.allPlayers.Count)];
-
-                } while (randomPlayer.life.Value <= 0);
-
                
-                Transform a = randomPlayer.GetComponentInChildren<Netcode.FighterNetworkConfig>().transform;
-                DestroyCharacter(a);
+                //BUSCAR UNO VIVO Y PASARLE LA TRANSFORMADA A DESTROYCHARACTER
+            
+                DestroyCharacter(false);
 
 
                 if (players.alivePlayers.Value == 1)
@@ -99,7 +89,7 @@ namespace Netcode
 
 
  
-        public void DestroyCharacter(Transform t )
+        public void DestroyCharacter(bool timeout)
         {
 
             print("ESS");
@@ -108,15 +98,14 @@ namespace Netcode
             try {
 
 
-                ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
-            virtualCamera.Follow = t;
-
+            
             for (var i = this.transform.childCount - 1; i >= 0; i--)
             {
                 print("child");
                 Destroy(this.transform.GetChild(i).gameObject);
             }
-
+            //alomejor corruitna aqui?
+                moveCameraClientRpc(timeout);
             }
             catch(System.Exception ex)
             {
@@ -125,6 +114,49 @@ namespace Netcode
           
            
         } 
+        [ClientRpc]
+       public void moveCameraClientRpc(bool timeout)
+        {
+            //METODO QUE MUEVE LA CÁMARA A NIVEL DE CLIENTE
+            Transform a;
+            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+            //SI HAY QUE MOVER LA CÁMARA PORQUE SE HA ACABADO EL TIEMPO= TODOS SIGUEN AL GANADOR
+            if (timeout)
+            {
+                a = players.allPlayers[players.allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform;
+                ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+                virtualCamera.Follow = a;
+                print(a);
+                print(virtualCamera);
+            }
+            else
+            {
+                //SI HAY QUE MOVERLA PORQUE HAN MATADO A UN PERSONAJE, SE MIRA QUE PERSONAJE ES Y SE CAMBIA A UNO RANDOM
+                if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character == null)
+                {
+
+                    PlayerNetworkConfig randomPlayer;
+                    do
+                    {
+
+                        randomPlayer = players.allPlayers[Random.Range(0, players.allPlayers.Count)];
+
+                    } while (randomPlayer.life.Value <= 0);
+                  a = randomPlayer.GetComponentInChildren<Netcode.FighterNetworkConfig>().transform;
+                    ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+                    virtualCamera.Follow = a;
+                    print(a);
+                    print(virtualCamera);
+                }
+
+            }
+            //DESTROYED SSIRVE PARA SABER SI YA SE HABÍA CAMBIADO LA CÁMARA ANTES
+               
+                
+             //   destroyed.Value = true;
+ 
+
+        }
 
         [ServerRpc]
         public void ChangeCharacterServerRpc(ulong id, string prefabName) 
