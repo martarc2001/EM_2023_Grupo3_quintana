@@ -19,6 +19,11 @@ public class PlayerAttributes : NetworkBehaviour
     [SerializeField] private GameObject OniPrefab;
     [SerializeField] private GameObject HuntressPrefab;
 
+    //HUD Interface Colors
+    Color red = new Color(1, 0, 0, 0.35f);
+    Color green = new Color(0, 1, 0, 0.35f);
+    Color blue = new Color(0, 0, 1, 0.35f);
+    
 
     void Start()
     {
@@ -52,8 +57,8 @@ public class PlayerAttributes : NetworkBehaviour
     void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
     {
         //Changing the name on prefab
-        transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName; 
-        
+        transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
+
 
         //Changing name and interface appearance
         var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild(thisClientID);
@@ -64,15 +69,15 @@ public class PlayerAttributes : NetworkBehaviour
         switch (otherPlayerSelectedSkin)
         {
             case "Huntress":
-                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = Color.green;
+                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = green;
                 otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
                 break;
             case "Oni":
-                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = Color.blue;
+                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = blue;
                 otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
                 break;
-            default:
-                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = Color.red;
+            default://"AkaiKaze"
+                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = red;
                 otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
                 break;
         }
