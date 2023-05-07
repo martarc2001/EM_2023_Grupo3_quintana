@@ -15,6 +15,7 @@ namespace Netcode
         public NetworkVariable<int> life;
         public GameObject characterPrefab;
         public NetworkVariable<bool> destroyed;
+        public ConnectedPlayers players;
         public override void OnNetworkSpawn()
         {
             if (!IsOwner) return;
@@ -22,9 +23,11 @@ namespace Netcode
 
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+
         }
 
-       
+
 
 
         [ServerRpc]
@@ -93,7 +96,7 @@ namespace Netcode
         {
 
             print("ESS");
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+           
            
             try {
 
@@ -119,7 +122,7 @@ namespace Netcode
         {
             //METODO QUE MUEVE LA CÁMARA A NIVEL DE CLIENTE
             Transform a;
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+           
             //SI HAY QUE MOVER LA CÁMARA PORQUE SE HA ACABADO EL TIEMPO= TODOS SIGUEN AL GANADOR
             if (timeout)
             {
@@ -174,8 +177,6 @@ namespace Netcode
             characterGameObject.transform.SetParent(transform, false);
             //HUD.transform.SetParent(characterGameObject.transform, false);
 
-
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             players.alivePlayers.Value += 1;
 
               players.player1 = this;
@@ -197,10 +198,6 @@ namespace Netcode
         [ClientRpc]
         public void checkWinClientRpc(bool tie)
         {
-                  
-
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-           
 
             //tie es true cuando ha quedado mas de un personaje vivo
 
