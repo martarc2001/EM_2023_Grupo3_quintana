@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-
+using UnityEngine.InputSystem;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
+    public NetworkVariable<int> readyPlayers = new NetworkVariable<int>();
+
     public NetworkVariable<int> alivePlayers;
     public NetworkVariable<bool> end;
     public Netcode.PlayerNetworkConfig player1;
@@ -17,16 +19,15 @@ public class ConnectedPlayers : NetworkBehaviour
     public float seconds;
     public bool start;
 
-    void Start()
-    {
-        
-    }
+    public static ConnectedPlayers Instance { get; private set; }
+  
     private int sortplayers(Netcode.PlayerNetworkConfig p1, Netcode.PlayerNetworkConfig p2)
     {
         return p1.life.Value.CompareTo(p2.life.Value);
     }
     private void Awake()
     {
+        Instance = this;
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
         seconds = 16;
         
@@ -140,4 +141,49 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         imgEmpate.SetActive(true);
     }
+
+
+    [ServerRpc(RequireOwnership =false)]
+    public void ShowReadyPlayersServerRpc()
+    {
+        readyPlayers.Value++;
+        LobbyWaiting.Instance.waitingText.text = "Waiting for players " + readyPlayers.Value + "/4 ready";
+
+        if (readyPlayers.Value == 4)
+        {
+            WaitCountdown();
+            Invoke("StartGame", 5f);
+        }
+    }
+
+    void WaitCountdown()
+    {
+        LobbyWaiting.Instance.gameObject.SetActive(false);
+        LobbyWaiting.Instance.gameWillStart.SetActive(true);
+        WaitCountdownClientRpc();
+    }
+
+    [ClientRpc]
+    void WaitCountdownClientRpc()
+    {
+        LobbyWaiting.Instance.gameObject.SetActive(false);
+        LobbyWaiting.Instance.gameWillStart.SetActive(true);
+    }
+
+
+    public void StartGame()
+    {
+
+        LobbyWaiting.Instance.gameWillStart.SetActive(false);
+        StartGameClientRpc();
+    }
+
+    [ClientRpc]
+   void StartGameClientRpc()
+    {
+
+        LobbyWaiting.Instance.gameWillStart.SetActive(false);
+    }
+
+
 }

@@ -8,8 +8,10 @@ namespace Systems
 {
     public class InputSystem : MonoBehaviour
     {
-        private static InputSystem _instance;
+        public static InputSystem _instance;
         public static InputSystem Instance => _instance;
+
+
 
         [SerializeField] private FighterMovement _character;
         public FighterMovement Character
@@ -46,6 +48,8 @@ namespace Systems
             }
         }
 
+
+
         public void SetCharacter(FighterMovement character)
         {
             _commands = new Dictionary<string, ICommand> {
@@ -58,11 +62,14 @@ namespace Systems
                 { "attack2", new Attack2Command(character) }
             };
 
+           
+
             Move.performed += OnMove;
             Move.Enable();
-
             Jump.performed += OnJump;
             Jump.Enable();
+            
+          
 
             Attack1.started += context =>
             {
