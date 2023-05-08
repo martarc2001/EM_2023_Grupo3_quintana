@@ -6,6 +6,8 @@ using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using Cinemachine;
+using UnityEngine.UI;
+using Unity.Networking.Transport;
 
 namespace Netcode
 {
@@ -16,6 +18,8 @@ namespace Netcode
         public NetworkVariable<bool> destroyed;
         public override void OnNetworkSpawn()
         {
+            life.OnValueChanged += OnLifeValueChanged;
+
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
 
@@ -44,9 +48,7 @@ namespace Netcode
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
         {
-
-            life.Value -= 50;
-            print("vida: " + life.Value);
+            life.Value -= 20;
 
             if (life.Value <= 0)
             {
@@ -78,9 +80,23 @@ namespace Netcode
                 }
             }
 
+        }
+
+
+        private void OnLifeValueChanged(int oldValue, int newValue)
+        {
+            var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
+            healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+
+        }
 
 
 
+
+        [ClientRpc]
+        public void UpdateHealthBarClientRpc(float fillAmount)
+        {
+            transform.GetChild(0).Find("HUD").Find("HealthBar").Find("Green").GetComponent<Image>().fillAmount = fillAmount;
         }
 
         IEnumerator Order()
