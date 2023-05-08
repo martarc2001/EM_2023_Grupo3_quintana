@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
@@ -17,7 +18,9 @@ public class ConnectedPlayers : NetworkBehaviour
     public GameObject imgPerder;
     public GameObject imgEmpate;
     public float seconds;
-    public bool start;
+    public bool gameStarted = false;
+    public TextMeshProUGUI TimerTxt;
+    public GameObject Timer;
 
     public static ConnectedPlayers Instance { get; private set; }
   
@@ -53,9 +56,12 @@ public class ConnectedPlayers : NetworkBehaviour
     private void FixedUpdate()
     {
 
-        if (allPlayers.Count > 1)
+        if (gameStarted)
         {
-            counterServerRpc();
+            if (IsServer)
+            {
+                counterServerRpc();
+            }
         }
      
     }
@@ -68,8 +74,9 @@ public class ConnectedPlayers : NetworkBehaviour
             if (seconds > 0)
             {
                 seconds -= Time.deltaTime;
-               
-              
+                updateTimer(seconds);
+
+
             }
             else
             {
@@ -78,6 +85,21 @@ public class ConnectedPlayers : NetworkBehaviour
                 endServerRpc();
             }
         }     
+    }
+
+    void updateTimer(float currentTime)
+    {
+        currentTime += 1;
+        float minutes = Mathf.FloorToInt(currentTime / 60);
+        float seconds = Mathf.FloorToInt(currentTime % 60);
+        TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        updateTimerClientRpc(currentTime,minutes,seconds);
+    }
+
+    [ClientRpc]
+    void updateTimerClientRpc(float currentTime,float minutes,float seconds)
+    {
+        TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
     [ServerRpc]
@@ -152,7 +174,7 @@ public class ConnectedPlayers : NetworkBehaviour
         if (readyPlayers.Value == 4)
         {
             WaitCountdown();
-            Invoke("StartGame", 5f);
+            
         }
     }
 
@@ -170,19 +192,25 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
     }
 
-
-    public void StartGame()
+    [ServerRpc(RequireOwnership =false)]
+    public void StartGameServerRpc()
     {
-
+        gameStarted = true;
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
+        LobbyManager.Instance.DeleteLobby();
+        Timer.SetActive(true);
+      //Reset position
         StartGameClientRpc();
     }
+
 
     [ClientRpc]
    void StartGameClientRpc()
     {
-
+        gameStarted = true;
+        Timer.SetActive(true);
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
+        
     }
 
 

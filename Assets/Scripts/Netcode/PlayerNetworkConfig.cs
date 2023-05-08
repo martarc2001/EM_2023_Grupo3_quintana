@@ -11,7 +11,7 @@ namespace Netcode
 {
     public class PlayerNetworkConfig : NetworkBehaviour
     {
-   
+
         public NetworkVariable<int> life;
         public GameObject characterPrefab;
         public NetworkVariable<bool> destroyed;

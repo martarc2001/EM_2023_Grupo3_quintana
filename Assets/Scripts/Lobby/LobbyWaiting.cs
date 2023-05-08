@@ -13,7 +13,7 @@ public class LobbyWaiting : MonoBehaviour
     [SerializeField] public TextMeshProUGUI waitingText;
     [SerializeField] public Button readyButton;
     [SerializeField] public GameObject gameWillStart;
-    public bool gameStarted=false;
+  
     
     // Start is called before the first frame update
     public static LobbyWaiting Instance { get; private set; }

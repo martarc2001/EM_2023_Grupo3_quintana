@@ -152,13 +152,16 @@ namespace Movement.Components
         public void TakeHit()
         {
         
-            if (IsOwner)
-            {
+         
+            
                
                 _networkAnimator.SetTrigger(AnimatorHit);
-              
-                player.checkLife();
-            }
+
+                if (ConnectedPlayers.Instance.gameStarted)
+                {
+                    player.checkLife();
+                }
+            
                
 
         }

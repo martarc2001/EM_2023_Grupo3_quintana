@@ -11,7 +11,12 @@ public class LobbyJoinUI : MonoBehaviour
     [SerializeField] TMP_InputField enterLobbyCode;
     [SerializeField] GameObject noLobbiesFound;
 
-    public static LobbyJoinUI Instance { get; private set; }
+    [SerializeField] private GameObject returnLobbyUI;
+    [SerializeField] private Button returnButton;
+
+   
+
+public static LobbyJoinUI Instance { get; private set; }
     void Awake() {
 
         Instance = this;
@@ -33,6 +38,12 @@ public class LobbyJoinUI : MonoBehaviour
                 ShowIssue();
             }
 
+        });
+
+        returnButton.onClick.AddListener(() =>
+        {
+            returnLobbyUI.SetActive(true);
+            gameObject.SetActive(false);
         });
     }
 
