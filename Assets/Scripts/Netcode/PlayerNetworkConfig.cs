@@ -15,10 +15,14 @@ namespace Netcode
         public NetworkVariable<int> life;
         public GameObject characterPrefab;
         public NetworkVariable<bool> destroyed;
+        public ConnectedPlayers players;
+        public NetworkVariable<bool> serverDespawned;
         public override void OnNetworkSpawn()
         {
+            serverDespawned = new NetworkVariable<bool>(false);
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
+            players= GameObject.Find("Players").GetComponent<ConnectedPlayers>();
 
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
@@ -51,7 +55,7 @@ namespace Netcode
             if (life.Value <= 0)
             {
 
-                var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+     
 
                 players.alivePlayers.Value -= 1;
                
@@ -93,7 +97,7 @@ namespace Netcode
         {
 
             print("ESS");
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+     
            
             try {
 
@@ -105,13 +109,13 @@ namespace Netcode
                 Destroy(this.transform.GetChild(i).gameObject);
             }
             //alomejor corruitna aqui?
-                moveCameraClientRpc(timeout);
+                //moveCameraClientRpc(timeout);
             }
             catch(System.Exception ex)
             {
                 print(ex);
             }
-          
+        
            
         } 
         [ClientRpc]
@@ -119,7 +123,7 @@ namespace Netcode
         {
             //METODO QUE MUEVE LA CÁMARA A NIVEL DE CLIENTE
             Transform a;
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+   
             //SI HAY QUE MOVER LA CÁMARA PORQUE SE HA ACABADO EL TIEMPO= TODOS SIGUEN AL GANADOR
             if (timeout)
             {
@@ -161,7 +165,7 @@ namespace Netcode
         [ServerRpc]
         public void ChangeCharacterServerRpc(ulong id, string prefabName) 
         {
-
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             string prefabPath = prefabName;
             GameObject prefab = Resources.Load<GameObject>(prefabPath);
 
@@ -175,7 +179,7 @@ namespace Netcode
             //HUD.transform.SetParent(characterGameObject.transform, false);
 
 
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+       
             players.alivePlayers.Value += 1;
 
               players.player1 = this;
@@ -198,10 +202,6 @@ namespace Netcode
         public void checkWinClientRpc(bool tie)
         {
                   
-
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-           
-
             //tie es true cuando ha quedado mas de un personaje vivo
 
             if (tie)
@@ -229,6 +229,46 @@ namespace Netcode
             }
 
         }
+
+
+        public override void OnNetworkDespawn()
+        {
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+            if (serverDespawned.Value ==true)
+            {
+                players.showError();
+            }
+            else
+            {
+            
+
+
+                this.life.Value = 0;
+                players.alivePlayers.Value -= 1;
+                if (players.alivePlayers.Value <= 1)
+                {
+                    players.calculateWinner();
+                    checkWinClientRpc(false);
+
+                }
+                base.OnNetworkDespawn();
+                }
+
+        }
+        private  void OnApplicationQuit() {
+            if (NetworkManager.Singleton.isActiveAndEnabled)
+            {
+                serverDespawned.Value = true;
+            }
+        }
+        private void OnDisable()
+        {
+            if (NetworkManager.Singleton.isActiveAndEnabled)
+            {
+                serverDespawned.Value = true;
+            }
+        }
+
 
 
     }

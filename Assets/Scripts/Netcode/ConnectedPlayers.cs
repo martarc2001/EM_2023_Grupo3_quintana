@@ -12,6 +12,7 @@ public class ConnectedPlayers : NetworkBehaviour
     NetworkVariable<FixedString32Bytes> winnerName;
 
     public Netcode.PlayerNetworkConfig player1;
+    public GameObject error;
     public GameObject winner;
     public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
@@ -32,10 +33,10 @@ public class ConnectedPlayers : NetworkBehaviour
     private void Awake()
     {
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 2000;
+        seconds = 30;
 
-
-       WinText = winner.GetComponent<TextMeshProUGUI>();
+       
+        WinText = winner.GetComponent<TextMeshProUGUI>();
         WinText.text = "";
    
         imgEmpate = GameObject.Find("empate");
@@ -43,7 +44,8 @@ public class ConnectedPlayers : NetworkBehaviour
         imgGanar = GameObject.Find("NewCanvasganado");
         end.Value = false;
 
-        imgGanar.SetActive(false);
+        error.SetActive(false);
+       imgGanar.SetActive(false);
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
@@ -55,12 +57,12 @@ public class ConnectedPlayers : NetworkBehaviour
     void Update()
     {
 
-        
+     
     }
 
     private void FixedUpdate()
     {
-
+       
         if (allPlayers.Count > 1)
         {
             counterServerRpc();
@@ -92,7 +94,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public void endServerRpc()
     {
 
-
+        player1= GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         allPlayers.Sort(sortplayers);
         int winningLife = allPlayers[allPlayers.Count - 1].life.Value;
         int loosingLife = allPlayers[0].life.Value;
@@ -132,7 +134,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
     IEnumerator Order()
     {
-      
+        player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         yield return new WaitForSeconds(3.0f);
         player1.checkWinClientRpc(false);
     }
@@ -166,5 +168,9 @@ public class ConnectedPlayers : NetworkBehaviour
 
         WinText.text = "¡"+winnerName.Value.ToString()+" wins!";
        
+    }
+    public void showError()
+    {
+        error.SetActive(true);
     }
 }
