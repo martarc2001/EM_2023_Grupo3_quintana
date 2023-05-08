@@ -10,6 +10,9 @@ public class LobbyJoinUI : MonoBehaviour
     [SerializeField] private Button joinByCode;
     [SerializeField] TMP_InputField enterLobbyCode;
 
+    [SerializeField] private GameObject returnLobbyUI;
+    [SerializeField] private Button returnButton;
+
     void Awake() {
         quickJoin.onClick.AddListener(() => {
             gameObject.SetActive(false);
@@ -22,6 +25,12 @@ public class LobbyJoinUI : MonoBehaviour
             gameObject.SetActive(false);
             LobbyManager.Instance.JoinWithCode(enterLobbyCode.text);
 
+        });
+
+        returnButton.onClick.AddListener(() =>
+        {
+            returnLobbyUI.SetActive(true);
+            gameObject.SetActive(false);
         });
     }
 }

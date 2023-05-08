@@ -14,7 +14,8 @@ public class LobbyCreateUI : MonoBehaviour
     [SerializeField] private TMP_InputField lobbyName;
     [SerializeField] private GameObject infoLobby;
 
-
+    [SerializeField] private GameObject returnLobbyUI;
+    [SerializeField] private Button returnLobbyButton;
     private void Awake()
     {
 
@@ -29,9 +30,12 @@ public class LobbyCreateUI : MonoBehaviour
             LobbyManager.Instance.CreateLobby(lobbyName.text, true);
             infoLobby.SetActive(true);
             gameObject.SetActive(false);
-            
 
+        });
 
+        returnLobbyButton.onClick.AddListener(() => {
+            returnLobbyUI.SetActive(true);
+            gameObject.SetActive(false);
         });
     }
 
