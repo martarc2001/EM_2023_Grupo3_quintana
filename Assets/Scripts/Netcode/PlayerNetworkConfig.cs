@@ -13,24 +13,47 @@ namespace Netcode
 {
     public class PlayerNetworkConfig : NetworkBehaviour
     {
+
         public NetworkVariable<int> life;
         public GameObject characterPrefab;
         public NetworkVariable<bool> destroyed;
+        public static PlayerNetworkConfig Instance { get; private set; }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
         public override void OnNetworkSpawn()
         {
             life.OnValueChanged += OnLifeValueChanged;
 
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
+            Spawning();
 
-            SetSpawnPositionServerRpc((int)OwnerClientId);
+            Invoke("ShowReadyPlayers", 2.0f);
 
-            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
-            ChangeCharacterServerRpc(OwnerClientId, prefabName);
+            ConnectedPlayers.Instance.readyPlayers.OnValueChanged += (oldVal, newVal) =>
+            {
+                LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
+            };
+
         }
 
+        void ShowReadyPlayers() {
+            LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
+        }
 
+        public void Spawning()
+        {
 
+            SetSpawnPositionServerRpc((int)OwnerClientId);
+            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
+            ChangeCharacterServerRpc(OwnerClientId, prefabName);
+           
+
+        }
+        
         [ServerRpc]
         public void InstantiateCharacterServerRpc(ulong id)
         {
@@ -195,6 +218,12 @@ namespace Netcode
             }
 
         }
+
+
+     
+
+        
+
 
 
     }

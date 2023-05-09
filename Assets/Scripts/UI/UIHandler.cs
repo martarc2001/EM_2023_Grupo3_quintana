@@ -10,6 +10,7 @@ namespace UI
     {
         public GameObject lobbyPanelHost;
         public GameObject lobbyPanelClient;
+        public GameObject waitingForPlayers;
 
         public bool hostSelection;
 
@@ -58,6 +59,7 @@ namespace UI
             characterSelectionPanel.SetActive(true);
             lobbyPanelHost.SetActive(false);
             lobbyPanelClient.SetActive(false);
+
             //NetworkManager.Singleton.StartHost();
         }
 
@@ -91,6 +93,7 @@ namespace UI
             else NetworkManager.Singleton.StartClient();
 
             characterSelectionPanel.SetActive(false);
+            waitingForPlayers.SetActive(true);
 
         }
     }
