@@ -88,6 +88,8 @@ namespace Netcode
             var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
             healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
 
+            var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
+            healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
         }
 
 
