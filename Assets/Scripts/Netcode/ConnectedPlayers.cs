@@ -34,14 +34,9 @@ public class ConnectedPlayers : NetworkBehaviour
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
         seconds = 16;
         
-        imgEmpate = GameObject.Find("empate");
-        imgPerder = GameObject.Find("NewCanvas6");
-        imgGanar = GameObject.Find("NewCanvasganado");
+       
         end.Value = false;
 
-        imgGanar.SetActive(false);
-        imgPerder.SetActive(false);
-        imgEmpate.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
 
     }
@@ -66,7 +61,7 @@ public class ConnectedPlayers : NetworkBehaviour
      
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     public void counterServerRpc()
     {
         if (end.Value == false)
@@ -192,7 +187,7 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
     }
 
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc]
     public void StartGameServerRpc()
     {
         gameStarted = true;

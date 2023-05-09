@@ -1126,9 +1126,9 @@ MonoBehaviour:
     m_InternalValue: 0
   player1: {fileID: 0}
   allPlayers: []
-  imgGanar: {fileID: 0}
-  imgPerder: {fileID: 0}
-  imgEmpate: {fileID: 0}
+  imgGanar: {fileID: 716096044}
+  imgPerder: {fileID: 940914401}
+  imgEmpate: {fileID: 1976874043}
   seconds: 0
   gameStarted: 0
   TimerTxt: {fileID: 2118515410}
@@ -3889,12 +3889,12 @@ GameObject:
   - component: {fileID: 716096047}
   - component: {fileID: 716096046}
   m_Layer: 0
-  m_Name: NewCanvasganado
+  m_Name: ImageGanar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &716096045
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3904,7 +3904,7 @@ RectTransform:
   m_GameObject: {fileID: 716096044}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 63.862118, y: 63.862118, z: 63.862118}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2125757789}
@@ -3912,7 +3912,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -683, y: -384}
+  m_AnchoredPosition: {x: 0.1, y: 0.2}
   m_SizeDelta: {x: 5.12, y: 5.12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &716096046
@@ -5199,12 +5199,12 @@ GameObject:
   - component: {fileID: 940914404}
   - component: {fileID: 940914403}
   m_Layer: 0
-  m_Name: NewCanvas6
+  m_Name: ImagePerder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &940914402
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5214,7 +5214,7 @@ RectTransform:
   m_GameObject: {fileID: 940914401}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 57.145782, y: 57.145782, z: 57.145782}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2125757789}
@@ -5222,7 +5222,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -683, y: -384}
+  m_AnchoredPosition: {x: -1.9, y: 10.6}
   m_SizeDelta: {x: 5.12, y: 5.12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &940914403
@@ -20509,12 +20509,12 @@ GameObject:
   - component: {fileID: 1976874046}
   - component: {fileID: 1976874045}
   m_Layer: 0
-  m_Name: empate
+  m_Name: ImageEmpate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1976874044
 RectTransform:
   m_ObjectHideFlags: 0
@@ -20524,7 +20524,7 @@ RectTransform:
   m_GameObject: {fileID: 1976874043}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 64.98039, y: 64.98039, z: 64.98039}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2125757789}
@@ -20532,7 +20532,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -683, y: -384}
+  m_AnchoredPosition: {x: 1.8, y: -0}
   m_SizeDelta: {x: 5.12, y: 5.12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1976874045
