@@ -1133,6 +1133,11 @@ MonoBehaviour:
   gameStarted: 0
   TimerTxt: {fileID: 2118515410}
   Timer: {fileID: 1514386620}
+  spawnPositionList:
+  - {x: -9.07, y: 1.15, z: 0}
+  - {x: 8.79, y: 0.424, z: 0}
+  - {x: -1.84, y: 2.62, z: 0}
+  - {x: 2.22, y: -1.44, z: 0}
 --- !u!4 &185932423
 Transform:
   m_ObjectHideFlags: 0
@@ -17736,7 +17741,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1370801450}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.22, y: -1.44, z: 0}
+  m_LocalPosition: {x: -1.64, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17767,7 +17772,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378110636}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.07, y: 1.15, z: 0}
+  m_LocalPosition: {x: -4.59, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21255,7 +21260,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2097206215}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.79, y: 0.424, z: 0}
+  m_LocalPosition: {x: 1.25, y: 0.67, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
-public class TimerScript : MonoBehaviour
+public class TimerScript : NetworkBehaviour
 {
     public float TimeLeft;
     public bool TimerOn = false;
@@ -18,6 +19,7 @@ public class TimerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+       
         if (TimerOn)
         {
             if (TimeLeft > 0)
@@ -27,7 +29,8 @@ public class TimerScript : MonoBehaviour
             }
             else
             {
-                ConnectedPlayers.Instance.StartGameServerRpc();
+                if (!IsClient) { ConnectedPlayers.Instance.StartGameServerRpc(); }
+               
                 TimeLeft = 0;
                 TimerOn = false;
             }

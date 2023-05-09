@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
 using TMPro;
+using Netcode;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
@@ -21,6 +22,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public bool gameStarted = false;
     public TextMeshProUGUI TimerTxt;
     public GameObject Timer;
+    [SerializeField] public List<Vector3> spawnPositionList;
 
     public static ConnectedPlayers Instance { get; private set; }
   
@@ -187,14 +189,21 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership =false)]
     public void StartGameServerRpc()
     {
         gameStarted = true;
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
         LobbyManager.Instance.DeleteLobby();
         Timer.SetActive(true);
-      //Reset position
+
+        foreach(NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            SetGameStartPosition((int)client.ClientId);
+            print((int)client.ClientId);
+
+        }
+            
         StartGameClientRpc();
     }
 
@@ -205,8 +214,15 @@ public class ConnectedPlayers : NetworkBehaviour
         gameStarted = true;
         Timer.SetActive(true);
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
-        
     }
+    public void SetGameStartPosition(int idClient)
+    {
+   allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[idClient];
+    }
+
+
+
+
 
 
 }

@@ -8,6 +8,7 @@ using System.Collections;
 using Cinemachine;
 using UnityEngine.UI;
 using Unity.Networking.Transport;
+using System.Collections.Generic;
 
 namespace Netcode
 {
@@ -17,6 +18,7 @@ namespace Netcode
         public NetworkVariable<int> life;
         public GameObject characterPrefab;
         public NetworkVariable<bool> destroyed;
+       
         public static PlayerNetworkConfig Instance { get; private set; }
 
         private void Awake()
@@ -31,12 +33,13 @@ namespace Netcode
             //InstantiateCharacterServerRpc(OwnerClientId);
             Spawning();
 
-            Invoke("ShowReadyPlayers", 2.0f);
+            Invoke("ShowReadyPlayers", 1.0f);
 
             ConnectedPlayers.Instance.readyPlayers.OnValueChanged += (oldVal, newVal) =>
             {
                 LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
             };
+          
 
         }
 
@@ -46,12 +49,8 @@ namespace Netcode
 
         public void Spawning()
         {
-
-            SetSpawnPositionServerRpc((int)OwnerClientId);
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
-           
-
         }
         
         [ServerRpc]
@@ -157,9 +156,9 @@ namespace Netcode
         public void ChangeCharacterServerRpc(ulong id, string prefabName)
         {
             GameObject prefab = Resources.Load<GameObject>(prefabName);
-            GameObject characterGameObject = Instantiate(prefab);
-            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
-            characterGameObject.transform.SetParent(transform, false);
+            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
+            characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+            characterPrefab.transform.SetParent(transform, false);
 
 
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
@@ -180,14 +179,9 @@ namespace Netcode
             print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
         }
 
-        [ServerRpc]
-        public void SetSpawnPositionServerRpc(int thisClientId)
-        {
-            Vector3 spawnPosition = GameObject.Find("SpawnPoints").transform.GetChild(thisClientId).transform.position;
-            transform.SetPositionAndRotation(spawnPosition, transform.rotation);
-        }
+      
 
-
+      
 
         [ClientRpc]
         public void checkWinClientRpc(bool tie)
@@ -222,7 +216,9 @@ namespace Netcode
 
      
 
-        
+
+
+
 
 
 
