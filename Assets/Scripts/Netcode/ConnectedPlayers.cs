@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-
+using Netcode;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
@@ -10,17 +10,13 @@ public class ConnectedPlayers : NetworkBehaviour
     public NetworkVariable<bool> end;
     public Netcode.PlayerNetworkConfig player1;
 
-    public List<Netcode.PlayerNetworkConfig> allPlayers;
+    public List<PlayerNetworkConfig> allPlayers;
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
     public float seconds;
     public bool start;
 
-    void Start()
-    {
-        
-    }
     private int sortplayers(Netcode.PlayerNetworkConfig p1, Netcode.PlayerNetworkConfig p2)
     {
         return p1.life.Value.CompareTo(p2.life.Value);
@@ -28,7 +24,7 @@ public class ConnectedPlayers : NetworkBehaviour
     private void Awake()
     {
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 16;
+        seconds = 30;
         
         imgEmpate = GameObject.Find("empate");
         imgPerder = GameObject.Find("NewCanvas6");
@@ -42,12 +38,6 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-        
-    }
 
     private void FixedUpdate()
     {
@@ -66,8 +56,7 @@ public class ConnectedPlayers : NetworkBehaviour
         {
             if (seconds > 0)
             {
-                seconds -= Time.deltaTime;
-               
+                seconds -= Time.deltaTime;              
               
             }
             else
@@ -92,23 +81,18 @@ public class ConnectedPlayers : NetworkBehaviour
         //EMPATE
         if (winningLife == loosingLife)
         {
-            print("A");
-            player1.checkWinClientRpc(true);
+            player1.CheckWinClientRpc(true);
         }
         else
         {
 
             for (int i = 0; i <= allPlayers.Count - 1; i++)
             {
-                print(allPlayers[i].life.Value);
                 //SI TIENE MENOS VIDA QUE EL GANADOR
-
                 if (allPlayers[i].life.Value != winningLife)
                 {
-                    print(allPlayers[i].life.Value + " personaje:  " + allPlayers[0]);
                     alivePlayers.Value -= 1;
-
-                    allPlayers[i].DestroyCharacter(allPlayers[allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform);
+                    allPlayers[i].DestroyCharacter();
 
                 }
             }
@@ -119,10 +103,9 @@ public class ConnectedPlayers : NetworkBehaviour
     }
 
     IEnumerator Order()
-    {
-      
+    {      
         yield return new WaitForSeconds(3.0f);
-        player1.checkWinClientRpc(false);
+        player1.CheckWinClientRpc(false);
     }
 
 

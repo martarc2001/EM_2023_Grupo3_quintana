@@ -21,9 +21,7 @@ namespace Netcode
 
         public void checkLife()
         {
-            //todos los clientes
-
-           
+            //todos los clientes         
          
             this.gameObject.GetComponentInParent<Netcode.PlayerNetworkConfig>().checkLifeServerRpc();
            

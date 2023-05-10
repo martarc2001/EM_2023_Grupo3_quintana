@@ -1,21 +1,28 @@
+using Cinemachine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UI;
 using Unity.Netcode;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.SceneManagement;
-using System.Collections;
-using Cinemachine;
 
 namespace Netcode
 {
     public class PlayerNetworkConfig : NetworkBehaviour
     {
         public NetworkVariable<int> life;
-        public GameObject characterPrefab;
-        public NetworkVariable<bool> destroyed;
+        public NetworkVariable<bool> dead;
+
+        ConnectedPlayers players;
+        private void Start()
+        {
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+        }
+
         public override void OnNetworkSpawn()
         {
+            dead.OnValueChanged += OnDeadValueChanged;
+
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
 
@@ -23,93 +30,20 @@ namespace Netcode
 
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
+
+            InstantiateOnConnectedPlayersListServerRpc();
+
+
         }
 
 
+        #region Creating Prefab
 
         [ServerRpc]
-        public void InstantiateCharacterServerRpc(ulong id)
+        public void SetSpawnPositionServerRpc(int thisClientId)
         {
-            GameObject characterGameObject = Instantiate(characterPrefab);
-            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject -- NO USAR, INESTABLE
-            //characterGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(id); //Si spawneamos as�, el propio jugador es PlayerPrefab pero el resto de clientes los recibe como HuntressPrefab
-            characterGameObject.transform.SetParent(transform, false);
-
-
-            //contador
-
-        }
-
-
-        [ServerRpc(RequireOwnership = false)]
-        public void checkLifeServerRpc()
-        {
-
-            life.Value -= 50;
-            print("vida: " + life.Value);
-
-            if (life.Value <= 0)
-            {
-
-                var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-
-                players.alivePlayers.Value -= 1;
-                destroyed.Value = true;
-
-                //BUSCAR UNO VIVO Y PASARLE LA TRANSFORMADA A DESTROYCHARACTER
-                PlayerNetworkConfig randomPlayer;
-                do
-                {
-                    randomPlayer = players.allPlayers[Random.Range(0, players.allPlayers.Count)];
-
-                } while (randomPlayer.life.Value <= 0);
-
-
-                Transform a = randomPlayer.GetComponentInChildren<Netcode.FighterNetworkConfig>().transform;
-                DestroyCharacter(a);
-
-
-                if (players.alivePlayers.Value == 1)
-                {
-                    print("win! ");
-                    StartCoroutine(Order());
-
-
-                }
-            }
-
-
-
-
-        }
-
-        IEnumerator Order()
-        {
-            print("corrutina de ganar---");
-            yield return new WaitForSeconds(3.0f);
-            checkWinClientRpc(false);
-        }
-
-        public void DestroyCharacter(Transform t)
-        {
-            destroyed.Value = true;
-            print("ESS");
-            var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            try
-            {
-                ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
-                virtualCamera.Follow = t;
-            }
-            catch (System.Exception ex)
-            {
-                print(ex);
-            }
-            for (var i = this.transform.childCount - 1; i >= 0; i--)
-            {
-                print("child");
-                Destroy(this.transform.GetChild(i).gameObject);
-            }
-
+            Vector3 spawnPosition = GameObject.Find("SpawnPoints").transform.GetChild(thisClientId).transform.position;
+            transform.SetPositionAndRotation(spawnPosition, transform.rotation);
         }
 
         [ServerRpc]
@@ -120,39 +54,91 @@ namespace Netcode
             characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
             characterGameObject.transform.SetParent(transform, false);
 
+        }
 
+        [ServerRpc]
+        public void InstantiateOnConnectedPlayersListServerRpc()
+        {
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             players.alivePlayers.Value += 1;
 
             players.player1 = this;
 
             print("player nuevo! n de players: " + players.alivePlayers.Value);
-            destroyed.Value = false;
-
-
+            dead.Value = false;
 
             life.Value = 100;
 
-
             players.allPlayers.Add(this);
-            print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1);
-            print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
+
+
         }
 
-        [ServerRpc]
-        public void SetSpawnPositionServerRpc(int thisClientId)
+        #endregion
+
+        #region Life values and getting killed
+        [ServerRpc(RequireOwnership = false)]
+        public void checkLifeServerRpc()
         {
-            Vector3 spawnPosition = GameObject.Find("SpawnPoints").transform.GetChild(thisClientId).transform.position;
-            transform.SetPositionAndRotation(spawnPosition, transform.rotation);
+
+            life.Value -= 50;
+
+            if (life.Value <= 0)
+            {
+                dead.Value = true;
+                players.alivePlayers.Value -= 1;
+                if (players.alivePlayers.Value == 1) { StartCoroutine(CheckWinCoroutine()); }
+            }
+
+        }
+
+        
+
+        /// <summary>
+        /// Used to change the camera to other player prefab when getting killed, also destroying its prefab
+        /// </summary>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        private void OnDeadValueChanged(bool oldValue, bool newValue)
+        {
+            NetworkObject deadPrefab = GetComponent<NetworkObject>();
+            if (deadPrefab.OwnerClientId == NetworkManager.Singleton.LocalClientId) //Only enters if condition if you own the dead prefab, necessary since everybody has this prefab owned or not
+            {
+
+                GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("PlayerPrefab");
+                List<GameObject> otherPlayerObjects = playerObjects.Where(obj => obj.GetComponent<NetworkObject>().OwnerClientId != NetworkManager.Singleton.LocalClientId).ToList(); //This list contains the rest of the prefabs, not the one that just died
+                                
+                if (otherPlayerObjects.Count > 0)
+                {                    
+                    GameObject selectedPrefab = otherPlayerObjects[Random.Range(0, otherPlayerObjects.Count)];
+                    
+                    ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+                    virtualCamera.Follow = selectedPrefab.transform;
+                }
+
+            }
+            DestroyCharacter();
+        }
+
+        public void DestroyCharacter()
+        {
+            Destroy(this.transform.GetChild(0).gameObject);
+        }
+
+
+        IEnumerator CheckWinCoroutine()
+        {
+            yield return new WaitForSeconds(3.0f);
+            CheckWinClientRpc(false);
         }
 
 
 
         [ClientRpc]
-        public void checkWinClientRpc(bool tie)
+        public void CheckWinClientRpc(bool tie)
         {
             print(this);
-            print(destroyed.Value);
+            print(dead.Value);
             var players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             //tie es true cuando ha quedado mas de un personaje vivo
 
@@ -166,7 +152,6 @@ namespace Netcode
                 if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
                 {
                     print("has gabnado");
-
                     players.showGanar();
                 }
                 else
@@ -178,6 +163,6 @@ namespace Netcode
 
         }
 
-
+        #endregion
     }
 }

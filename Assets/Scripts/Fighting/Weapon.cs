@@ -32,7 +32,7 @@ namespace Fighting
             Animator effect = Instantiate(effectsPrefab);
             effect.transform.position = pos;
             effect.SetTrigger(Hit03);
-            Debug.Log("chiribitas :3");
+            //Debug.Log("chiribitas :3");
         }
     }
 }

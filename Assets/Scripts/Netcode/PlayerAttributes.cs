@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -95,8 +96,6 @@ public class PlayerAttributes : NetworkBehaviour
             Debug.Log("Cliente: " + client.ClientId);
         }
     }
-
-
 
 
 }
