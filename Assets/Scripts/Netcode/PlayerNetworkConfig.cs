@@ -214,7 +214,7 @@ namespace Netcode
         characterPrefab.transform.SetParent(transform, false);
 
 
-
+        players.allPlayers.Add(this);
         players.alivePlayers.Value += 1;
 
         players.player1 = this;
