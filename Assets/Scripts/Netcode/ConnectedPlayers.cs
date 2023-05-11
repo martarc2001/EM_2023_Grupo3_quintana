@@ -56,7 +56,7 @@ public class ConnectedPlayers : NetworkBehaviour
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
-        winnerName = new NetworkVariable<FixedString32Bytes>();
+        winnerName = new NetworkVariable<FixedString32Bytes>("");
 
     }
 

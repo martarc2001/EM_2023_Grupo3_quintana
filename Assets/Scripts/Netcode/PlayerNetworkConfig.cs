@@ -22,15 +22,7 @@ namespace Netcode
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
         private bool despawned;
-        public override void OnNetworkSpawn()
-        {
-            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
-            despawned = false;
-            serverDespawned = new NetworkVariable<bool>(false);
-            if (!IsOwner) return;
-            //InstantiateCharacterServerRpc(OwnerClientId);
-            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-       
+
         public static PlayerNetworkConfig Instance { get; private set; }
 
         private void Awake()
@@ -39,8 +31,11 @@ namespace Netcode
         }
         public override void OnNetworkSpawn()
         {
+            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
+            despawned = false;
+            serverDespawned = new NetworkVariable<bool>(false);
             life.OnValueChanged += OnLifeValueChanged;
-
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
             Spawning();
@@ -51,7 +46,7 @@ namespace Netcode
             {
                 LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
             };
-          
+
 
         }
 
@@ -78,11 +73,11 @@ namespace Netcode
             {
                 if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
                 {
-                    try { 
-                  
-                    StartCoroutine(wait());
+                    try {
+
+                        StartCoroutine(wait());
                     }
-                    catch{}
+                    catch { }
                 }
             }
             base.OnNetworkDespawn();
@@ -94,7 +89,7 @@ namespace Netcode
 
             if (NetworkManager.Singleton.ConnectedClientsList.Count == 1)
             {
-                players.calculateWinner(); 
+                players.calculateWinner();
                 StartCoroutine(Order());//corrutina que espera unos segundos y muestra quien ha ganado
 
             }
@@ -110,8 +105,8 @@ namespace Netcode
 
         }
 
-    
-        
+
+
         [ServerRpc]
         public void InstantiateCharacterServerRpc(ulong id)
         {
@@ -174,101 +169,101 @@ namespace Netcode
             transform.GetChild(0).Find("HUD").Find("HealthBar").Find("Green").GetComponent<Image>().fillAmount = fillAmount;
         }
 
-        }
-       
-        IEnumerator Order()
+    
+
+    IEnumerator Order()
+    {
+
+        print("corrutina de ganar---");
+        yield return new WaitForSeconds(3.0f);
+
+        checkWinClientRpc(false);
+
+    }
+
+
+
+    public void DestroyCharacter(bool timeout)
+    {
+
+        try
         {
 
-            print("corrutina de ganar---");
-            yield return new WaitForSeconds(3.0f);
-
-            checkWinClientRpc(false);
-
+            for (var i = this.transform.childCount - 1; i >= 0; i--)
+            {
+                print("child");
+                Destroy(this.transform.GetChild(i).gameObject);
+            }
+            //alomejor corruitna aqui?
+            //moveCameraClientRpc(timeout);
         }
-
-
-
-        public void DestroyCharacter(bool timeout)
+        catch (System.Exception ex)
         {
-
-            try
-            {
-
-                for (var i = this.transform.childCount - 1; i >= 0; i--)
-                {
-                    print("child");
-                    Destroy(this.transform.GetChild(i).gameObject);
-                }
-                //alomejor corruitna aqui?
-                //moveCameraClientRpc(timeout);
-            }
-            catch (System.Exception ex)
-            {
-                print(ex);
-            }
-
-        }
-      
-
-        [ServerRpc]
-        public void ChangeCharacterServerRpc(ulong id, string prefabName)
-        {
-            GameObject prefab = Resources.Load<GameObject>(prefabName);
-            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
-            characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(id);
-            characterPrefab.transform.SetParent(transform, false);
-
-
-
-            players.alivePlayers.Value += 1;
-
-            players.player1 = this;
-
-            print("player nuevo! n de players: " + players.alivePlayers.Value);
-            destroyed.Value = false;
-
-
-
-            life.Value = 100;
-
-            print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1);
-            print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
-        }
-
-      
-
-      
-
-        [ClientRpc]
-        public void checkWinClientRpc(bool tie)
-        {
-            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            //tie es true cuando ha quedado mas de un personaje vivo
-
-            if (tie)
-            {
-                players.showEmpate();
-            }
-            else
-            {
-                //showwinner tiene que ser clientrpc porque también se llama cuando acaba el contador, que se hace en el server
-                players.showWinnerClientRpc();
-           
-                if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
-                {
-
-                    print("has gabnado");
-
-                    players.showGanar();
-                }
-                else
-                {
-                    print("has perdido");
-                    players.showPerder();
-                }
-            }
-
+            print(ex);
         }
 
     }
+
+
+    [ServerRpc]
+    public void ChangeCharacterServerRpc(ulong id, string prefabName)
+    {
+        GameObject prefab = Resources.Load<GameObject>(prefabName);
+        characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
+        characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+        characterPrefab.transform.SetParent(transform, false);
+
+
+
+        players.alivePlayers.Value += 1;
+
+        players.player1 = this;
+
+        print("player nuevo! n de players: " + players.alivePlayers.Value);
+        destroyed.Value = false;
+
+
+
+        life.Value = 100;
+
+        print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1);
+        print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
+    }
+
+
+
+
+
+    [ClientRpc]
+    public void checkWinClientRpc(bool tie)
+    {
+        players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+        //tie es true cuando ha quedado mas de un personaje vivo
+
+        if (tie)
+        {
+            players.showEmpate();
+        }
+        else
+        {
+            //showwinner tiene que ser clientrpc porque también se llama cuando acaba el contador, que se hace en el server
+            players.showWinnerClientRpc();
+
+            if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
+            {
+
+                print("has gabnado");
+
+                players.showGanar();
+            }
+            else
+            {
+                print("has perdido");
+                players.showPerder();
+            }
+        }
+
+    }
+    }
 }
+
