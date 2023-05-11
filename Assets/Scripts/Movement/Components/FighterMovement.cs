@@ -58,10 +58,10 @@ namespace Movement.Components
         {
             if (!IsServer) return;
             UpdateAnimations();
-          
+
         }
 
-   
+
         public void UpdateAnimations()
         {
             _grounded = Physics2D.OverlapCircle(_feet.position, 0.1f, _floor);
@@ -69,10 +69,10 @@ namespace Movement.Components
             _animator.SetFloat(AnimatorVSpeed, this._rigidbody2D.velocity.y);
             _animator.SetBool(AnimatorGrounded, this._grounded);
 
-          
+
         }
 
-       
+
 
         void FixedUpdate()
         {
@@ -117,8 +117,8 @@ namespace Movement.Components
         [ServerRpc]
         public void JumpServerRpc(IJumperReceiver.JumpStage stage)
         {
-          
-            
+
+
             switch (stage)
             {
                 case IJumperReceiver.JumpStage.Jumping:
@@ -131,10 +131,10 @@ namespace Movement.Components
                 case IJumperReceiver.JumpStage.Landing:
                     break;
             }
-         
+
         }
 
-      [ServerRpc]
+        [ServerRpc]
         public void Attack1ServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorAttack1); //AnimatorAttack1 es Animator.StringToHash("attack1"); cacheado  
@@ -151,13 +151,15 @@ namespace Movement.Components
         //Este metodo no es serverRPC porque al llamar a los ataques desde el servidor, también ejecuta el OnCollider de Weapon y en caso de que colisione, llamaría a TakeHit
         public void TakeHit()
         {
-            print("is this it?");
-           
-               
-                print("do you even take hit bro");
+        
+         
+
                 _networkAnimator.SetTrigger(AnimatorHit);
-              
-                player.checkLife();
+
+                if (ConnectedPlayers.Instance.gameStarted)
+                {
+                    player.checkLife();
+                }
             
                
 
@@ -170,7 +172,7 @@ namespace Movement.Components
         
         }
 
-       
+
     }
 
 

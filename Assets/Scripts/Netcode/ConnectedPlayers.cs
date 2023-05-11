@@ -4,9 +4,13 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 using Unity.Collections;
+using UnityEngine.InputSystem;
+using Netcode;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
+    public NetworkVariable<int> readyPlayers = new NetworkVariable<int>();
+
     public NetworkVariable<int> alivePlayers;
     public NetworkVariable<bool> end;
     NetworkVariable<FixedString32Bytes> winnerName;
@@ -21,10 +25,12 @@ public class ConnectedPlayers : NetworkBehaviour
     public GameObject imgPerder;
     public GameObject imgEmpate;
     public float seconds;
-    public bool start;
+    public bool gameStarted = false;
+    public TextMeshProUGUI TimerTxt;
+    public GameObject Timer;
+    [SerializeField] public List<Vector3> spawnPositionList;
 
-    
-
+    public static ConnectedPlayers Instance { get; private set; }
   
     private int sortplayers(Netcode.PlayerNetworkConfig p1, Netcode.PlayerNetworkConfig p2)
     {
@@ -32,6 +38,7 @@ public class ConnectedPlayers : NetworkBehaviour
     }
     private void Awake()
     {
+        Instance = this;
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
         seconds = 30;
 
@@ -63,17 +70,16 @@ public class ConnectedPlayers : NetworkBehaviour
     private void FixedUpdate()
     {
 
-        if (IsServer)
+        if (gameStarted)
         {
-            if (NetworkManager.Singleton.ConnectedClientsList.Count > 1)
+            if (IsServer)
             {
                 counterServerRpc();
             }
         }
     }
 
-
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     public void counterServerRpc()
     {
         if (end.Value == false)
@@ -81,8 +87,9 @@ public class ConnectedPlayers : NetworkBehaviour
             if (seconds > 0)
             {
                 seconds -= Time.deltaTime;
-               
-              
+                updateTimer(seconds);
+
+
             }
             else
             {
@@ -91,6 +98,21 @@ public class ConnectedPlayers : NetworkBehaviour
                 endServerRpc();
             }
         }     
+    }
+
+    void updateTimer(float currentTime)
+    {
+        currentTime += 1;
+        float minutes = Mathf.FloorToInt(currentTime / 60);
+        float seconds = Mathf.FloorToInt(currentTime % 60);
+        TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        updateTimerClientRpc(currentTime,minutes,seconds);
+    }
+
+    [ClientRpc]
+    void updateTimerClientRpc(float currentTime,float minutes,float seconds)
+    {
+        TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
     [ServerRpc]
@@ -181,11 +203,76 @@ public class ConnectedPlayers : NetworkBehaviour
     public void showWinnerClientRpc()
     {
 
-        WinText.text = "¡"+winnerName.Value.ToString()+" wins!";
+        WinText.text = "ï¿½"+winnerName.Value.ToString()+" wins!";
        
     }
     public void showError()
     {
         error.SetActive(true);
     }
+
+
+    [ServerRpc(RequireOwnership =false)]
+    public void ShowReadyPlayersServerRpc()
+    {
+        readyPlayers.Value++;
+        LobbyWaiting.Instance.waitingText.text = "Waiting for players " + readyPlayers.Value + "/4 ready";
+
+        if (readyPlayers.Value == 4)
+        {
+            WaitCountdown();
+            
+        }
+    }
+
+    void WaitCountdown()
+    {
+        LobbyWaiting.Instance.gameObject.SetActive(false);
+        LobbyWaiting.Instance.gameWillStart.SetActive(true);
+        WaitCountdownClientRpc();
+    }
+
+    [ClientRpc]
+    void WaitCountdownClientRpc()
+    {
+        LobbyWaiting.Instance.gameObject.SetActive(false);
+        LobbyWaiting.Instance.gameWillStart.SetActive(true);
+    }
+
+    [ServerRpc(RequireOwnership =false)]
+    public void StartGameServerRpc()
+    {
+        gameStarted = true;
+        LobbyWaiting.Instance.gameWillStart.SetActive(false);
+        LobbyManager.Instance.DeleteLobby();
+        Timer.SetActive(true);
+
+        foreach(NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            SetGameStartPosition((int)client.ClientId);
+            print((int)client.ClientId);
+
+        }
+            
+        StartGameClientRpc();
+    }
+
+
+    [ClientRpc]
+   void StartGameClientRpc()
+    {
+        gameStarted = true;
+        Timer.SetActive(true);
+        LobbyWaiting.Instance.gameWillStart.SetActive(false);
+    }
+    public void SetGameStartPosition(int idClient)
+    {
+   allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[idClient];
+    }
+
+
+
+
+
+
 }

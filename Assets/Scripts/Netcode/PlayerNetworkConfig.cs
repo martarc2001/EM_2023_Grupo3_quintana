@@ -7,11 +7,15 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using Cinemachine;
 using TMPro;
+using UnityEngine.UI;
+using Unity.Networking.Transport;
+using System.Collections.Generic;
 
 namespace Netcode
 {
     public class PlayerNetworkConfig : NetworkBehaviour
     {
+
         public NetworkVariable<int> life;
         public GameObject characterPrefab;
         public NetworkVariable<bool> destroyed;
@@ -26,7 +30,37 @@ namespace Netcode
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+       
+        public static PlayerNetworkConfig Instance { get; private set; }
 
+        private void Awake()
+        {
+            Instance = this;
+        }
+        public override void OnNetworkSpawn()
+        {
+            life.OnValueChanged += OnLifeValueChanged;
+
+            if (!IsOwner) return;
+            //InstantiateCharacterServerRpc(OwnerClientId);
+            Spawning();
+
+            Invoke("ShowReadyPlayers", 1.0f);
+
+            ConnectedPlayers.Instance.readyPlayers.OnValueChanged += (oldVal, newVal) =>
+            {
+                LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
+            };
+          
+
+        }
+
+        void ShowReadyPlayers() {
+            LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
+        }
+
+        public void Spawning()
+        {
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
         }
@@ -76,11 +110,11 @@ namespace Netcode
 
         }
 
+    
+        
         [ServerRpc]
         public void InstantiateCharacterServerRpc(ulong id)
         {
-
-
             GameObject characterGameObject = Instantiate(characterPrefab);
             characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id); //Mirar SpawnAsPlayerObject -- NO USAR, INESTABLE
             //characterGameObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(id); //Si spawneamos as�, el propio jugador es PlayerPrefab pero el resto de clientes los recibe como HuntressPrefab
@@ -93,9 +127,7 @@ namespace Netcode
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
         {
-
-            life.Value -= 50;
-            print("vida: " + life.Value);
+            life.Value -= 20;
 
             if (life.Value <= 0)
             {
@@ -121,8 +153,26 @@ namespace Netcode
                 }
             }
 
+        }
 
 
+        private void OnLifeValueChanged(int oldValue, int newValue)
+        {
+            var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
+            healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+
+            var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
+            healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+        }
+
+
+
+
+        [ClientRpc]
+        public void UpdateHealthBarClientRpc(float fillAmount)
+        {
+            transform.GetChild(0).Find("HUD").Find("HealthBar").Find("Green").GetComponent<Image>().fillAmount = fillAmount;
+        }
 
         }
        
@@ -163,18 +213,10 @@ namespace Netcode
         [ServerRpc]
         public void ChangeCharacterServerRpc(ulong id, string prefabName)
         {
-            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-            string prefabPath = prefabName;
-            GameObject prefab = Resources.Load<GameObject>(prefabPath);
-
-
-            GameObject characterGameObject = Instantiate(prefab);
-            //GameObject HUD = Instantiate(Resources.Load<GameObject>("HUD"));
-
-            characterGameObject.GetComponent<NetworkObject>().SpawnWithOwnership(id);
-
-            characterGameObject.transform.SetParent(transform, false);
-            //HUD.transform.SetParent(characterGameObject.transform, false);
+            GameObject prefab = Resources.Load<GameObject>(prefabName);
+            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
+            characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(id);
+            characterPrefab.transform.SetParent(transform, false);
 
 
 
@@ -192,6 +234,10 @@ namespace Netcode
             print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1);
             print(GameObject.Find("Players").GetComponent<ConnectedPlayers>().player1.life.Value);
         }
+
+      
+
+      
 
         [ClientRpc]
         public void checkWinClientRpc(bool tie)
@@ -224,11 +270,5 @@ namespace Netcode
 
         }
 
-
-      
-
-      
-            
-        
     }
 }

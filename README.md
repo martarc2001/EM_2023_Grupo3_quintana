@@ -40,9 +40,9 @@ automáticamente.
 - [ ] RF06: El juego debe permitir distintas rondas para una misma partida.
 - [ ] RF07: El juego debe mostrar al ganador de la partida al finalizarla.
 - [ ] RF08: Después de finalizar una partida, el juego debe volver a la sala con los jugadores.
-- [ ] RF09: Los jugadores deben poder elegir un personaje antes de iniciar la partida.
+- [X] RF09: Los jugadores deben poder elegir un personaje antes de iniciar la partida.
 - [ ] RF10: Los ataques de los personajes deben causar daño a los adversarios.
-- [ ] RF11: El juego debe funcionar con un servidor autoritativo.
+- [X] RF11: El juego debe funcionar con un servidor autoritativo.
 - [ ] RF12: Se debe implementar un sistema de airdash del personaje para hacer esquivas en el
 aire en cualquier dirección.
 - [ ] RF13: Los jugadores solo podrán realizar un airdash en el aire por vez y tendrán que tocar

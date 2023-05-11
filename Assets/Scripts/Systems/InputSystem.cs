@@ -8,8 +8,10 @@ namespace Systems
 {
     public class InputSystem : MonoBehaviour
     {
-        private static InputSystem _instance;
+        public static InputSystem _instance;
         public static InputSystem Instance => _instance;
+
+
 
         [SerializeField] private FighterMovement _character;
         public FighterMovement Character
@@ -45,6 +47,8 @@ namespace Systems
                 SetCharacter(_character);
             }
         }
+
+
 
         public void SetCharacter(FighterMovement character)
         {
