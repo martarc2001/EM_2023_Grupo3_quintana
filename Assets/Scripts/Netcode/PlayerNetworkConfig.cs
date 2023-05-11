@@ -37,14 +37,14 @@ namespace Netcode
 
             ConnectedPlayers.Instance.readyPlayers.OnValueChanged += (oldVal, newVal) =>
             {
-                LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
+                LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/"+LobbyManager.Instance.maxPlayers+" ready";
             };
           
 
         }
 
         void ShowReadyPlayers() {
-            LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
+            LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready";
         }
 
         public void Spawning()

@@ -44,5 +44,21 @@ private void Awake()
         });
     }
 
+    public void ChangeNumPlayers(int value)
+    {
+        if (value == 0)
+        {
+            LobbyManager.Instance.maxPlayers = 2;
+        }
+        if (value == 1)
+        {
+            LobbyManager.Instance.maxPlayers = 3;
+        }
+        if (value == 2)
+        {
+            LobbyManager.Instance.maxPlayers = 4;
+        }
+    }
+
   
 }

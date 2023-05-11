@@ -166,9 +166,9 @@ public class ConnectedPlayers : NetworkBehaviour
     public void ShowReadyPlayersServerRpc()
     {
         readyPlayers.Value++;
-        LobbyWaiting.Instance.waitingText.text = "Waiting for players " + readyPlayers.Value + "/4 ready";
+        LobbyWaiting.Instance.waitingText.text = "Waiting for players " + readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready";
 
-        if (readyPlayers.Value == 4)
+        if (readyPlayers.Value == LobbyManager.Instance.maxPlayers)
         {
             WaitCountdown();
             
