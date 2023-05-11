@@ -10,6 +10,7 @@ using TMPro;
 using UnityEngine.UI;
 using Unity.Networking.Transport;
 using System.Collections.Generic;
+using System;
 
 namespace Netcode
 {
@@ -36,9 +37,12 @@ namespace Netcode
             serverDespawned = new NetworkVariable<bool>(false);
             life.OnValueChanged += OnLifeValueChanged;
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-          
-           
+
+            
             ChangeMaxPlayerServerRpc();
+          
+         
+            
             
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
@@ -54,7 +58,7 @@ namespace Netcode
 
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership =false)]
         void ChangeMaxPlayerServerRpc() {
             ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers);
         }
