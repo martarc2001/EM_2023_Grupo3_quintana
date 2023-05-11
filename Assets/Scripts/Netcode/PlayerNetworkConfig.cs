@@ -22,7 +22,10 @@ namespace Netcode
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
         private bool despawned;
-
+        public GameObject lostp1;
+        public GameObject lostp2;
+        public GameObject lostp3;
+        public GameObject lostp4;
         public static PlayerNetworkConfig Instance { get; private set; }
 
         private void Awake()
