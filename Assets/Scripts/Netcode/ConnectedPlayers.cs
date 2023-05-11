@@ -45,10 +45,7 @@ public class ConnectedPlayers : NetworkBehaviour
        
         WinText = winner.GetComponent<TextMeshProUGUI>();
         WinText.text = "";
-   
-        imgEmpate = GameObject.Find("empate");
-        imgPerder = GameObject.Find("NewCanvas6");
-        imgGanar = GameObject.Find("NewCanvasganado");
+
         end.Value = false;
 
         error.SetActive(false);
@@ -203,7 +200,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public void showWinnerClientRpc()
     {
 
-        WinText.text = "�"+winnerName.Value.ToString()+" wins!";
+        WinText.text = "¡"+winnerName.Value.ToString()+" wins!";
        
     }
     public void showError()
