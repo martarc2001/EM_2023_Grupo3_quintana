@@ -45,7 +45,7 @@ public class ConnectedPlayers : NetworkBehaviour
         end.Value = false;
 
         error.SetActive(false);
-       imgGanar.SetActive(false);
+        imgGanar.SetActive(false);
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
@@ -62,13 +62,16 @@ public class ConnectedPlayers : NetworkBehaviour
 
     private void FixedUpdate()
     {
-       
-        if (allPlayers.Count > 1)
+
+        if (IsServer)
         {
-            counterServerRpc();
+            if (NetworkManager.Singleton.ConnectedClientsList.Count > 1)
+            {
+                counterServerRpc();
+            }
         }
-     
     }
+
 
     [ServerRpc(RequireOwnership = false)]
     public void counterServerRpc()
@@ -95,8 +98,9 @@ public class ConnectedPlayers : NetworkBehaviour
     {
 
         player1= GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
-        allPlayers.Sort(sortplayers);
-        int winningLife = allPlayers[allPlayers.Count - 1].life.Value;
+        Netcode.PlayerNetworkConfig playerWin = calculateWinner();
+
+        int winningLife = playerWin.life.Value;
         int loosingLife = allPlayers[0].life.Value;
         print("ganador:" + winningLife);
 
@@ -123,28 +127,39 @@ public class ConnectedPlayers : NetworkBehaviour
 
                 }
             }
-            Netcode.PlayerNetworkConfig winner =allPlayers[allPlayers.Count-1];
-            winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
-            
+    
             //mostrar si han ganado o no
             StartCoroutine(Order());
            
         }
     }
 
-    IEnumerator Order()
+ IEnumerator Order()
     {
+     
         player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         yield return new WaitForSeconds(3.0f);
         player1.checkWinClientRpc(false);
     }
     //metodo que calcula el ganador
-    public void calculateWinner()
+    public Netcode.PlayerNetworkConfig calculateWinner()
     {
+        if (IsServer)
+        {
 
+       
+        allPlayers.Clear();
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            allPlayers.Add(client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>());
+        }
         allPlayers.Sort(sortplayers);
         Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];
         winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
+            return winner;
+        }
+        return null;
+
     }
 
 
