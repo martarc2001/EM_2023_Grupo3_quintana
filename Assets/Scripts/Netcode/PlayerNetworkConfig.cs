@@ -221,7 +221,7 @@ namespace Netcode
         players.alivePlayers.Value += 1;
 
         players.player1 = this;
-
+            players.allPlayers.Add(this);
         print("player nuevo! n de players: " + players.alivePlayers.Value);
         destroyed.Value = false;
 
