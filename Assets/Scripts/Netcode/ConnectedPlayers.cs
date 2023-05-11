@@ -24,6 +24,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
+    public GameObject fightSign;
     public float seconds;
     public bool gameStarted = false;
     public TextMeshProUGUI TimerTxt;
@@ -243,6 +244,7 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
         LobbyManager.Instance.DeleteLobby();
         Timer.SetActive(true);
+        Invoke("HideFightSign", 1.5f);
 
         foreach(NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
@@ -269,7 +271,17 @@ public class ConnectedPlayers : NetworkBehaviour
 
 
 
+    void HideFightSign()
+    {
+        fightSign.SetActive(false);
+        HideFightSignClientRpc();
+    }
 
-
+    [ClientRpc]
+    void HideFightSignClientRpc()
+    {
+        fightSign.SetActive(false);
+       
+    }
 
 }

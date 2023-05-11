@@ -10,9 +10,9 @@ using UnityEngine;
 
 public class LobbyManager : MonoBehaviour
 {
-   
-    public int maxPlayers = 2;
-    private Lobby joinedLobby;
+
+    public int maxPlayers;
+    public Lobby joinedLobby;
     private float heartBeatTimer;
   
     
@@ -21,7 +21,7 @@ public class LobbyManager : MonoBehaviour
     
     private void Awake()
     {
-    
+       
         Instance = this;
         DontDestroyOnLoad(gameObject);
 

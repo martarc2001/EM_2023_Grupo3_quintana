@@ -36,6 +36,10 @@ namespace Netcode
             serverDespawned = new NetworkVariable<bool>(false);
             life.OnValueChanged += OnLifeValueChanged;
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+          
+           
+            ChangeMaxPlayerServerRpc();
+            
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
             Spawning();
@@ -44,13 +48,26 @@ namespace Netcode
 
             ConnectedPlayers.Instance.readyPlayers.OnValueChanged += (oldVal, newVal) =>
             {
-                LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/"+LobbyManager.Instance.maxPlayers+" ready";
+                LobbyWaiting.Instance.waitingText.text = "Waiting for players " + newVal.ToString() + "/"+LobbyManager.Instance.maxPlayers + " ready";
             };
 
 
         }
 
-        void ShowReadyPlayers() {
+        [ServerRpc]
+        void ChangeMaxPlayerServerRpc() {
+            ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers);
+        }
+
+
+        [ClientRpc]
+        void ChangeMaxPlayerClientRpc(int players)
+        {
+            LobbyManager.Instance.maxPlayers = players;
+        }
+
+        void ShowReadyPlayers()
+        {
             LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready";
         }
 
