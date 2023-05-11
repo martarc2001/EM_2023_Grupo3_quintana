@@ -79,7 +79,7 @@ namespace Movement.Components
             _rigidbody2D.velocity = new Vector2(_direction.x, _rigidbody2D.velocity.y);
         }
 
-
+        //elen
 
         [ServerRpc]
         public void MoveServerRpc(IMoveableReceiver.Direction direction)
@@ -153,8 +153,7 @@ namespace Movement.Components
         {
         
          
-            
-               
+
                 _networkAnimator.SetTrigger(AnimatorHit);
 
                 if (ConnectedPlayers.Instance.gameStarted)
@@ -170,7 +169,7 @@ namespace Movement.Components
         public void DieServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorDie);
-            Debug.Log("Takehit");
+        
         }
 
 

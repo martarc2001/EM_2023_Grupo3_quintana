@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using UnityEngine.InputSystem;
 using TMPro;
+using Unity.Collections;
+using UnityEngine.InputSystem;
 using Netcode;
 
 public class ConnectedPlayers : NetworkBehaviour
@@ -12,9 +13,14 @@ public class ConnectedPlayers : NetworkBehaviour
 
     public NetworkVariable<int> alivePlayers;
     public NetworkVariable<bool> end;
-    public Netcode.PlayerNetworkConfig player1;
+    NetworkVariable<FixedString32Bytes> winnerName;
 
+    public Netcode.PlayerNetworkConfig player1;
+    public GameObject error;
+    public GameObject winner;
+    public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
+ 
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
@@ -34,12 +40,20 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         Instance = this;
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
-        seconds = 16;
-        
+        seconds = 30;
+
        
+        WinText = winner.GetComponent<TextMeshProUGUI>();
+        WinText.text = "";
+
         end.Value = false;
 
+        error.SetActive(false);
+        imgGanar.SetActive(false);
+        imgPerder.SetActive(false);
+        imgEmpate.SetActive(false);
         alivePlayers = new NetworkVariable<int>(0);
+        winnerName = new NetworkVariable<FixedString32Bytes>("");
 
     }
 
@@ -47,7 +61,7 @@ public class ConnectedPlayers : NetworkBehaviour
     void Update()
     {
 
-        
+     
     }
 
     private void FixedUpdate()
@@ -60,7 +74,6 @@ public class ConnectedPlayers : NetworkBehaviour
                 counterServerRpc();
             }
         }
-     
     }
 
     [ServerRpc]
@@ -103,9 +116,10 @@ public class ConnectedPlayers : NetworkBehaviour
     public void endServerRpc()
     {
 
+        player1= GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
+        Netcode.PlayerNetworkConfig playerWin = calculateWinner();
 
-        allPlayers.Sort(sortplayers);
-        int winningLife = allPlayers[allPlayers.Count - 1].life.Value;
+        int winningLife = playerWin.life.Value;
         int loosingLife = allPlayers[0].life.Value;
         print("ganador:" + winningLife);
 
@@ -128,24 +142,44 @@ public class ConnectedPlayers : NetworkBehaviour
                     print(allPlayers[i].life.Value + " personaje:  " + allPlayers[0]);
                     alivePlayers.Value -= 1;
 
-                    allPlayers[i].DestroyCharacter(allPlayers[allPlayers.Count - 1].GetComponentInChildren<Netcode.FighterNetworkConfig>().transform);
+                    allPlayers[i].DestroyCharacter(true);
 
                 }
             }
-
+    
             //mostrar si han ganado o no
             StartCoroutine(Order());
+           
         }
     }
 
-    IEnumerator Order()
+ IEnumerator Order()
     {
-      
+     
+        player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         yield return new WaitForSeconds(3.0f);
         player1.checkWinClientRpc(false);
     }
+    //metodo que calcula el ganador
+    public Netcode.PlayerNetworkConfig calculateWinner()
+    {
+        if (IsServer)
+        {
 
+       
+        allPlayers.Clear();
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            allPlayers.Add(client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>());
+        }
+        allPlayers.Sort(sortplayers);
+        Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];
+        winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
+            return winner;
+        }
+        return null;
 
+    }
 
 
     public void showGanar()
@@ -159,6 +193,19 @@ public class ConnectedPlayers : NetworkBehaviour
     public void showEmpate()
     {
         imgEmpate.SetActive(true);
+    }
+   
+    //metodo que muestra a todos los clientes el ganador
+    [ClientRpc]
+    public void showWinnerClientRpc()
+    {
+
+        WinText.text = "¡"+winnerName.Value.ToString()+" wins!";
+       
+    }
+    public void showError()
+    {
+        error.SetActive(true);
     }
 
 
