@@ -79,34 +79,9 @@ namespace Netcode
                 {
                     try
                     {
-                        //buscamos qué mensaje de error hay que activar
-                        int clientpos = 0;
-                    foreach(NetworkClient myclient in NetworkManager.Singleton.ConnectedClientsList)
-                    {
-                        clientpos++;
-                        if (clientId == myclient.ClientId)
-                        {
-                            switch (clientpos)
-                            {
-                                case 0:
-                                       lostp1.SetActive(true);
-                                    break;
-                                case 1:
-                                        lostp2.SetActive(true);
-                                        break;
-                                case 2:
-                                      lostp3.SetActive(true);
-                                        break;
-                                case 3:
-                                        lostp4.SetActive(true);
-                                        break;
-                            }
-                            clientpos = 0;
-                            break;
-                        }
-                    }
+                        players.ClientDisconnectedMessage(clientId);//mensaje de error en el personaje que ha perdido
 
-                        if (ConnectedPlayers.Instance.gameStarted)
+                        if (ConnectedPlayers.Instance.gameStarted)//solo se calcula el ganador cuando la partida ha empezado
                         {
 
                             StartCoroutine(wait());

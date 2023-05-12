@@ -76,12 +76,42 @@ public class ConnectedPlayers : NetworkBehaviour
 
      
     }
-    public void hideShowError(GameObject g, bool active)
+     void hideShowError(GameObject g, bool active)
     {
         g.SetActive(active);
         for (var i = g.transform.childCount - 1; i >= 0; i--)
         {
             g.transform.GetChild(i).gameObject.SetActive(active);
+        }
+    }
+
+    public void ClientDisconnectedMessage(ulong clientId)
+    {
+        //buscamos qué mensaje de error hay que activar
+        int clientpos = 0;
+        foreach (NetworkClient myclient in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            clientpos++;
+            if (clientId == myclient.ClientId)
+            {
+                switch (clientpos)
+                {
+                    case 0:
+                        hideShowError(lostp1, true);
+                        break;
+                    case 1:
+                        hideShowError(lostp2, true);
+                        break;
+                    case 2:
+                        hideShowError(lostp3, true);
+                        break;
+                    case 3:
+                        hideShowError(lostp4, true);
+                        break;
+                }
+                clientpos = 0;
+                break;
+            }
         }
     }
 
