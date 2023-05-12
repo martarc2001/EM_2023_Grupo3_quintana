@@ -22,14 +22,12 @@ namespace Netcode
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
         private bool despawned;
-        public GameObject lostp1;
-        public GameObject lostp2;
-        public GameObject lostp3;
-        public GameObject lostp4;
+      
         public static PlayerNetworkConfig Instance { get; private set; }
 
         private void Awake()
         {
+          
             Instance = this;
         }
         public override void OnNetworkSpawn()
@@ -50,16 +48,11 @@ namespace Netcode
                 LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
             };
 
-            lostp1 = GameObject.Find("message");
-            lostp2 = GameObject.Find("message (1)");
-            lostp3 = GameObject.Find("message (2)");
-            lostp4 = GameObject.Find("message (3)");
-            lostp1.SetActive(false);
-            lostp2.SetActive(false);
-            lostp3.SetActive(false);
-            lostp4.SetActive(false);
+            
         }
 
+     
+        
         void ShowReadyPlayers() {
             LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/4 ready";
         }
@@ -82,10 +75,12 @@ namespace Netcode
             else//si se ha desconectado un cliente
             {
                
-                if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
+                if (IsServer&&IsOwner)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
                 {
-                    //buscamos qué mensaje de error hay que activar
-                    int clientpos = 0;
+                    try
+                    {
+                        //buscamos qué mensaje de error hay que activar
+                        int clientpos = 0;
                     foreach(NetworkClient myclient in NetworkManager.Singleton.ConnectedClientsList)
                     {
                         clientpos++;
@@ -94,27 +89,30 @@ namespace Netcode
                             switch (clientpos)
                             {
                                 case 0:
-                                    lostp1.SetActive(true);
+                                       lostp1.SetActive(true);
                                     break;
                                 case 1:
-                                    lostp2.SetActive(true);
-                                    break;
+                                        lostp2.SetActive(true);
+                                        break;
                                 case 2:
-                                    lostp3.SetActive(true);
-                                    break;
+                                      lostp3.SetActive(true);
+                                        break;
                                 case 3:
-                                    lostp3.SetActive(true);
-                                    break;
+                                        lostp4.SetActive(true);
+                                        break;
                             }
+                            clientpos = 0;
                             break;
                         }
                     }
 
-                    try {
+                        if (ConnectedPlayers.Instance.gameStarted)
+                        {
 
-                        StartCoroutine(wait());
+                            StartCoroutine(wait());
+                        }
                     }
-                    catch { }
+                    catch(System.Exception ex) { print(ex); }
                 }
             }
             base.OnNetworkDespawn();

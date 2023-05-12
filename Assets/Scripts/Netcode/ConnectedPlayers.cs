@@ -20,7 +20,10 @@ public class ConnectedPlayers : NetworkBehaviour
     public GameObject winner;
     public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
- 
+    public GameObject lostp1;
+    public GameObject lostp2;
+    public GameObject lostp3;
+    public GameObject lostp4;
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
@@ -55,6 +58,16 @@ public class ConnectedPlayers : NetworkBehaviour
         alivePlayers = new NetworkVariable<int>(0);
         winnerName = new NetworkVariable<FixedString32Bytes>("");
 
+        lostp1 = GameObject.Find("Panel1");
+        lostp2 = GameObject.Find("Panel2");
+        lostp3 = GameObject.Find("Panel3");
+        lostp4 = GameObject.Find("Panel4");
+        hideShowError(lostp1, false);
+        hideShowError(lostp2, false);
+        hideShowError(lostp3, false);
+        hideShowError(lostp4, false);
+
+
     }
 
     // Update is called once per frame
@@ -62,6 +75,14 @@ public class ConnectedPlayers : NetworkBehaviour
     {
 
      
+    }
+    public void hideShowError(GameObject g, bool active)
+    {
+        g.SetActive(active);
+        for (var i = g.transform.childCount - 1; i >= 0; i--)
+        {
+            g.transform.GetChild(i).gameObject.SetActive(active);
+        }
     }
 
     private void FixedUpdate()
