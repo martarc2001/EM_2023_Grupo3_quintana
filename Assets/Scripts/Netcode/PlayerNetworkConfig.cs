@@ -12,6 +12,7 @@ namespace Netcode
     {
         public NetworkVariable<int> life;
         public NetworkVariable<bool> dead;
+        public ulong following;
 
         ConnectedPlayers players;
         private void Start()
@@ -22,6 +23,7 @@ namespace Netcode
         public override void OnNetworkSpawn()
         {
             dead.OnValueChanged += OnDeadValueChanged;
+            following = OwnerClientId;
 
             if (!IsOwner) return;
             //InstantiateCharacterServerRpc(OwnerClientId);
@@ -32,9 +34,10 @@ namespace Netcode
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
 
             InstantiateOnConnectedPlayersListServerRpc();
-
+            
 
         }
+        
 
 
         #region Creating Prefab
@@ -102,27 +105,39 @@ namespace Netcode
         private void OnDeadValueChanged(bool oldValue, bool newValue)
         {
             NetworkObject deadPrefab = GetComponent<NetworkObject>();
-            if (deadPrefab.OwnerClientId == NetworkManager.Singleton.LocalClientId) //Only enters if condition if you own the dead prefab, necessary since everybody has this prefab owned or not
-            {
+            ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
 
+            bool isKilled = deadPrefab.OwnerClientId == NetworkManager.Singleton.LocalClientId; //Only enters if condition if you own the dead prefab, necessary since everybody has this prefab owned or not
+            bool isFollower = deadPrefab.OwnerClientId == NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerNetworkConfig>().following; //A prefab can also enter if they were following the one that got killed
+            if ( isKilled|| isFollower) 
+            {                
                 GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("PlayerPrefab");
                 List<GameObject> otherPlayerObjects = playerObjects.Where(obj => obj.GetComponent<NetworkObject>().OwnerClientId != NetworkManager.Singleton.LocalClientId).ToList(); //This list contains the rest of the prefabs, not the one that just died
                                 
                 if (otherPlayerObjects.Count > 0)
-                {                    
-                    GameObject selectedPrefab = otherPlayerObjects[Random.Range(0, otherPlayerObjects.Count)];
-                    
-                    ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+                {   
+                    //Camera follow other player
+                    GameObject selectedPrefab = otherPlayerObjects[Random.Range(0, otherPlayerObjects.Count)];                  
                     virtualCamera.Follow = selectedPrefab.transform;
+
+                    //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
+                    following =  selectedPrefab.transform.parent.GetComponent<NetworkObject>().OwnerClientId;
                 }
 
             }
+
             DestroyCharacter();
         }
 
+
+
+
         public void DestroyCharacter()
         {
-            Destroy(this.transform.GetChild(0).gameObject);
+            for (var i = this.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(this.transform.GetChild(i).gameObject);
+            }
         }
 
 
