@@ -14,8 +14,12 @@ public class LobbyCreateUI : MonoBehaviour
     [SerializeField] private TMP_InputField lobbyName;
     [SerializeField] private GameObject infoLobby;
 
+    [SerializeField] private GameObject returnLobbyUI;
+    [SerializeField] private Button returnLobbyButton;
 
-    private void Awake()
+    
+
+private void Awake()
     {
 
         //lobbyManager = lobby.GetComponent<LobbyManager>();
@@ -33,6 +37,27 @@ public class LobbyCreateUI : MonoBehaviour
 
 
         });
+
+        returnLobbyButton.onClick.AddListener(() => {
+            returnLobbyUI.SetActive(true);
+            gameObject.SetActive(false);
+        });
+    }
+
+    public void ChangeNumPlayers(int value)
+    {
+        if (value == 0)
+        {
+            LobbyManager.Instance.maxPlayers = 2;
+        }
+        if (value == 1)
+        {
+            LobbyManager.Instance.maxPlayers = 3;
+        }
+        if (value == 2)
+        {
+            LobbyManager.Instance.maxPlayers = 4;
+        }
     }
 
   

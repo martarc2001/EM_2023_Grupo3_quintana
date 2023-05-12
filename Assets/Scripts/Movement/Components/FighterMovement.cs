@@ -79,7 +79,7 @@ namespace Movement.Components
             _rigidbody2D.velocity = new Vector2(_direction.x, _rigidbody2D.velocity.y);
         }
 
-
+        //elen
 
         [ServerRpc]
         public void MoveServerRpc(IMoveableReceiver.Direction direction)
@@ -151,14 +151,17 @@ namespace Movement.Components
         //Este metodo no es serverRPC porque al llamar a los ataques desde el servidor, también ejecuta el OnCollider de Weapon y en caso de que colisione, llamaría a TakeHit
         public void TakeHit()
         {
+        
+         
 
+                _networkAnimator.SetTrigger(AnimatorHit);
 
-
-            _networkAnimator.SetTrigger(AnimatorHit);
-
-            player.checkLife();
-
-
+                if (ConnectedPlayers.Instance.gameStarted)
+                {
+                    player.checkLife();
+                }
+            
+               
 
         }
 
@@ -166,7 +169,7 @@ namespace Movement.Components
         public void DieServerRpc()
         {
             _networkAnimator.SetTrigger(AnimatorDie);
-            Debug.Log("Takehit");
+        
         }
 
 

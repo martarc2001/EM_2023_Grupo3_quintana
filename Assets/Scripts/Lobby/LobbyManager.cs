@@ -10,9 +10,9 @@ using UnityEngine;
 
 public class LobbyManager : MonoBehaviour
 {
-   
-    private int maxPlayers = 4;
-    private Lobby joinedLobby;
+
+    public int maxPlayers;
+    public Lobby joinedLobby;
     private float heartBeatTimer;
   
     
@@ -21,6 +21,7 @@ public class LobbyManager : MonoBehaviour
     
     private void Awake()
     {
+       
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
@@ -95,13 +96,36 @@ public class LobbyManager : MonoBehaviour
 
     public async void QuickJoin()
     {
+        
         try
         {
-            joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+            QueryLobbiesOptions queryLobbiesOptions = new QueryLobbiesOptions
+            {
+                Filters = new List<QueryFilter>
+                {
+                    new QueryFilter(QueryFilter.FieldOptions.AvailableSlots,"0",QueryFilter.OpOptions.GT)
+                    
+                    //Un filtro para que devuelva las lobbies que tienen al menos un hueco
+                },
 
-            //Instanciamos un cliente 
-            //NetworkManager.Singleton.StartClient();
-            UIHandler.Instance.InstantiateClient();
+            };
+            QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);//nos devuelve la info de las lobbies creadas
+
+            if (queryResponse.Results.Count != 0)
+            {
+                joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+
+                //Instanciamos un cliente 
+                //NetworkManager.Singleton.StartClient();
+                UIHandler.Instance.InstantiateClient();
+                LobbyJoinUI.Instance.gameObject.SetActive(false);
+            }
+            else
+            {
+                LobbyJoinUI.Instance.ShowIssue();
+            }
+
+        
         }
         catch (LobbyServiceException e)
         {
@@ -112,18 +136,24 @@ public class LobbyManager : MonoBehaviour
 
     public async void JoinWithCode(string lobbyCode)
     {
+      
         try
         {
             joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
-
-
-            //Instanciamos un cliente 
-            //NetworkManager.Singleton.StartClient();
-            UIHandler.Instance.InstantiateClient();
+        
+                 //Instanciamos un cliente 
+                //NetworkManager.Singleton.StartClient();
+                UIHandler.Instance.InstantiateClient();
+                LobbyJoinUI.Instance.gameObject.SetActive(false);
+         
+               
+                
+           
 
         }
         catch(LobbyServiceException e)
         {
+            LobbyJoinUI.Instance.ShowIssue();
             Debug.Log(e);
         }
     }

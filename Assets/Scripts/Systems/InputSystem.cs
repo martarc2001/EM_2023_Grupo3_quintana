@@ -8,8 +8,10 @@ namespace Systems
 {
     public class InputSystem : MonoBehaviour
     {
-        private static InputSystem _instance;
+        public static InputSystem _instance;
         public static InputSystem Instance => _instance;
+
+
 
         [SerializeField] private FighterMovement _character;
         public FighterMovement Character
@@ -46,9 +48,15 @@ namespace Systems
             }
         }
 
+
+
         public void SetCharacter(FighterMovement character)
         {
-            _commands = new Dictionary<string, ICommand> {
+            if (Character != null)
+            {
+                try
+                {
+                    _commands = new Dictionary<string, ICommand> {
                 { "stop", new StopCommand(character) },
                 { "walk-left", new WalkLeftCommand(character) },
                 { "walk-right", new WalkRightCommand(character) },
@@ -58,23 +66,29 @@ namespace Systems
                 { "attack2", new Attack2Command(character) }
             };
 
-            Move.performed += OnMove;
-            Move.Enable();
+                    Move.performed += OnMove;
+                    Move.Enable();
 
-            Jump.performed += OnJump;
-            Jump.Enable();
+                    Jump.performed += OnJump;
+                    Jump.Enable();
 
-            Attack1.started += context =>
-            {
-                _commands["attack1"].Execute();
-            };
-            Attack1.Enable();
+                    Attack1.started += context =>
+                    {
+                        _commands["attack1"].Execute();
+                    };
+                    Attack1.Enable();
 
-            Attack2.started += context =>
-            {
-                _commands["attack2"].Execute();
-            };
-            Attack2.Enable();
+                    Attack2.started += context =>
+                    {
+                        _commands["attack2"].Execute();
+                    };
+                    Attack2.Enable();
+                }
+                catch (System.Exception ex)
+                {
+                    print(ex);
+                }
+            }
         }
 
         public void OnMove(InputAction.CallbackContext context)
@@ -82,7 +96,8 @@ namespace Systems
             float value = context.ReadValue<float>();
 
             // Debug.Log($"OnMove called {context.action}");
-
+            //elen
+            if (Character != null) {
             if (value == 0f)
             {
                 _commands["stop"].Execute();
@@ -95,21 +110,25 @@ namespace Systems
             {
                 _commands["walk-left"].Execute();
             }
+            }
         }
 
         public void OnJump(InputAction.CallbackContext context)
         {
-            float value = context.ReadValue<float>();
-
-            // Debug.Log($"OnJump called {context.ReadValue<float>()}");
-
-            if (value == 0f)
+            if (Character != null)
             {
-                _commands["land"].Execute();
-            }
-            else
-            {
-                _commands["jump"].Execute();
+                float value = context.ReadValue<float>();
+
+                // Debug.Log($"OnJump called {context.ReadValue<float>()}");
+
+                if (value == 0f)
+                {
+                    _commands["land"].Execute();
+                }
+                else
+                {
+                    _commands["jump"].Execute();
+                }
             }
         }
     }
