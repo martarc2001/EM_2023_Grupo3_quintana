@@ -153,6 +153,7 @@ namespace Netcode
         /// <param name="newValue"></param>
         private void OnDeadValueChanged(bool oldValue, bool newValue)
         {
+            //Changing the camera to other player
             NetworkObject deadPrefab = GetComponent<NetworkObject>();
             ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
 
@@ -175,6 +176,13 @@ namespace Netcode
 
             }
 
+            //HUD Interface
+            var background = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("BG");
+            background.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.35f);
+            var sprite = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("Sprite");            
+            sprite.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.5f);
+
+            //Deleting character prefab
             DestroyCharacter();
         }
 
