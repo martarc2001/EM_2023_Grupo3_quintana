@@ -85,6 +85,7 @@ public class ConnectedPlayers : NetworkBehaviour
             }
             else
             {
+                gameStarted = false;
                 end.Value = true;
                 print("fin");
                 endServerRpc();
@@ -156,9 +157,9 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         if (IsServer)
         {
+           gameStarted = false;
 
-       
-        allPlayers.Clear();
+            allPlayers.Clear();
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             allPlayers.Add(client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>());
