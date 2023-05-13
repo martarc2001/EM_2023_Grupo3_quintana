@@ -20,7 +20,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public GameObject winner;
     public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
- 
+
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
@@ -32,7 +32,7 @@ public class ConnectedPlayers : NetworkBehaviour
     [SerializeField] public List<Vector3> spawnPositionList;
 
     public static ConnectedPlayers Instance { get; private set; }
-  
+
     private int sortplayers(Netcode.PlayerNetworkConfig p1, Netcode.PlayerNetworkConfig p2)
     {
         return p1.life.Value.CompareTo(p2.life.Value);
@@ -43,7 +43,7 @@ public class ConnectedPlayers : NetworkBehaviour
         allPlayers = new List<Netcode.PlayerNetworkConfig>();
         seconds = 30;
 
-       
+
         WinText = winner.GetComponent<TextMeshProUGUI>();
         WinText.text = "";
 
@@ -58,7 +58,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
-
+    #region Timer
     private void FixedUpdate()
     {
 
@@ -90,7 +90,7 @@ public class ConnectedPlayers : NetworkBehaviour
                 print("fin");
                 endServerRpc();
             }
-        }     
+        }
     }
 
     void updateTimer(float currentTime)
@@ -99,11 +99,11 @@ public class ConnectedPlayers : NetworkBehaviour
         float minutes = Mathf.FloorToInt(currentTime / 60);
         float seconds = Mathf.FloorToInt(currentTime % 60);
         TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
-        updateTimerClientRpc(currentTime,minutes,seconds);
+        updateTimerClientRpc(currentTime, minutes, seconds);
     }
 
     [ClientRpc]
-    void updateTimerClientRpc(float currentTime,float minutes,float seconds)
+    void updateTimerClientRpc(float currentTime, float minutes, float seconds)
     {
         TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
@@ -112,7 +112,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public void endServerRpc()
     {
 
-        player1= GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
+        player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         Netcode.PlayerNetworkConfig playerWin = calculateWinner();
 
         int winningLife = playerWin.life.Value;
@@ -138,16 +138,18 @@ public class ConnectedPlayers : NetworkBehaviour
 
                 }
             }
-    
+
             //mostrar si han ganado o no
             StartCoroutine(Order());
-           
+
         }
     }
+    #endregion
 
- IEnumerator Order()
+    #region Checking and showing win
+    IEnumerator Order()
     {
-     
+
         player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         yield return new WaitForSeconds(3.0f);
         player1.CheckWinClientRpc(false);
@@ -157,16 +159,16 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         if (IsServer)
         {
-           gameStarted = false;
+            gameStarted = false;
 
             allPlayers.Clear();
-        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
-        {
-            allPlayers.Add(client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>());
-        }
-        allPlayers.Sort(sortplayers);
-        Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];
-        winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
+            foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+            {
+                allPlayers.Add(client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>());
+            }
+            allPlayers.Sort(sortplayers);
+            Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];
+            winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
             return winner;
         }
         return null;
@@ -174,34 +176,17 @@ public class ConnectedPlayers : NetworkBehaviour
     }
 
 
-    public void showGanar()
-    {
-        imgGanar.SetActive(true);
-    }
-    public void showPerder()
-    {
-        imgPerder.SetActive(true);
-    }
-    public void showEmpate()
-    {
-        imgEmpate.SetActive(true);
-    }
-   
+    public void showGanar() { imgGanar.SetActive(true); }
+    public void showPerder() { imgPerder.SetActive(true); }
+    public void showEmpate() { imgEmpate.SetActive(true); }
+
     //metodo que muestra a todos los clientes el ganador
     [ClientRpc]
-    public void showWinnerClientRpc()
-    {
+    public void showWinnerClientRpc() { WinText.text = "¡" + winnerName.Value.ToString() + " wins!"; }
+    #endregion
 
-        WinText.text = "¡"+winnerName.Value.ToString()+" wins!";
-       
-    }
-    public void showError()
-    {
-        error.SetActive(true);
-    }
-
-
-    [ServerRpc(RequireOwnership =false)]
+    #region From lobby to game
+    [ServerRpc(RequireOwnership = false)]
     public void ShowReadyPlayersServerRpc()
     {
         readyPlayers.Value++;
@@ -210,7 +195,7 @@ public class ConnectedPlayers : NetworkBehaviour
         if (readyPlayers.Value == LobbyManager.Instance.maxPlayers)
         {
             WaitCountdown();
-            
+
         }
     }
 
@@ -228,7 +213,7 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
     }
 
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc(RequireOwnership = false)]
     public void StartGameServerRpc()
     {
         gameStarted = true;
@@ -237,31 +222,31 @@ public class ConnectedPlayers : NetworkBehaviour
         Timer.SetActive(true);
         Invoke("HideFightSign", 1.5f);
 
-        foreach(NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             SetGameStartPosition((int)client.ClientId);
             print((int)client.ClientId);
 
         }
-            
+
         StartGameClientRpc();
     }
 
-
     [ClientRpc]
-   void StartGameClientRpc()
+    void StartGameClientRpc()
     {
         gameStarted = true;
         Timer.SetActive(true);
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
     }
+
     public void SetGameStartPosition(int idClient)
     {
-   allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[idClient];
+        allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[idClient];
     }
+    #endregion
 
-
-
+    #region Fight sign
     void HideFightSign()
     {
         fightSign.SetActive(false);
@@ -269,10 +254,9 @@ public class ConnectedPlayers : NetworkBehaviour
     }
 
     [ClientRpc]
-    void HideFightSignClientRpc()
-    {
-        fightSign.SetActive(false);
-       
-    }
+    void HideFightSignClientRpc() { fightSign.SetActive(false); }
+    #endregion
+
+    public void showError() { error.SetActive(true); } //This error shows up if server/host disconnects
 
 }

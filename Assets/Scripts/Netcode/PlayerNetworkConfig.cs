@@ -242,25 +242,15 @@ namespace Netcode
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
-<<<<<<< Updated upstream
-=======
             LobbyManager.Instance.LeaveLobby();
-            //players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
 
->>>>>>> Stashed changes
             //si el que se ha desconectado es el host
             if (!ConnectedPlayers.Instance.gameStarted) return;
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
             else//si se ha desconectado un cliente
             {
-<<<<<<< Updated upstream
                 if (IsOwner)
-=======
-
-
-                if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
->>>>>>> Stashed changes
                 {
                     //Showing disconnection on HUD Interface
                     showDisconnectionOnInterfaceClientRpc(clientId);
@@ -274,6 +264,7 @@ namespace Netcode
                         }
                         catch (System.Exception ex) { print(ex); }
                     }
+
                 }
             }
             base.OnNetworkDespawn();
