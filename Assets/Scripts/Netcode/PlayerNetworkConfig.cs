@@ -19,7 +19,6 @@ namespace Netcode
 
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
-        private bool despawned;
 
         public static PlayerNetworkConfig Instance { get; private set; }
 
@@ -31,7 +30,6 @@ namespace Netcode
             life.OnValueChanged += OnLifeValueChanged;
 
             following = OwnerClientId;
-            despawned = false;
             serverDespawned = new NetworkVariable<bool>(false);
 
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
@@ -288,14 +286,6 @@ namespace Netcode
 
         }
 
-        public void Update()
-        {
-            if (despawned == true)
-            {
-                serverDespawned.Value = despawned;
-            }
-
-        }
         #endregion
     }
 }
