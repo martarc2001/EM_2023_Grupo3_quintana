@@ -1,4 +1,5 @@
 using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,12 +54,12 @@ namespace Netcode
 
         #region Lobby
         [ServerRpc(RequireOwnership = false)]
-        void ChangeMaxPlayerServerRpc(){ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers);}
+        void ChangeMaxPlayerServerRpc() { ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); }
 
         [ClientRpc]
-        void ChangeMaxPlayerClientRpc(int players){LobbyManager.Instance.maxPlayers = players;}
+        void ChangeMaxPlayerClientRpc(int players) { LobbyManager.Instance.maxPlayers = players; }
 
-        void ShowReadyPlayers(){ LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready";}
+        void ShowReadyPlayers() { LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready"; }
 
         #endregion
 
@@ -111,11 +112,18 @@ namespace Netcode
         #region Life values and getting killed
         private void OnLifeValueChanged(int oldValue, int newValue)
         {
-            var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
-            healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+            try
+            {
+                var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
+                healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+            }
+            catch (Exception ex) { } //Deletion of prefab children can affect these lines, do not remove try-catch
+            finally
+            {
+                var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
+                healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+            }
 
-            var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
-            healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
         }
 
         [ClientRpc]
@@ -153,6 +161,7 @@ namespace Netcode
         /// <param name="newValue"></param>
         private void OnDeadValueChanged(bool oldValue, bool newValue)
         {
+            //Changing the camera to other player
             NetworkObject deadPrefab = GetComponent<NetworkObject>();
             ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
 
@@ -166,7 +175,7 @@ namespace Netcode
                 if (otherPlayerObjects.Count > 0)
                 {
                     //Camera follow other player
-                    GameObject selectedPrefab = otherPlayerObjects[Random.Range(0, otherPlayerObjects.Count)];
+                    GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
                     virtualCamera.Follow = selectedPrefab.transform;
 
                     //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
@@ -175,6 +184,13 @@ namespace Netcode
 
             }
 
+            //HUD Interface
+            var background = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("BG");
+            background.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.35f);
+            var sprite = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("Sprite");
+            sprite.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.5f);
+
+            //Deleting character prefab
             DestroyCharacter();
         }
 
