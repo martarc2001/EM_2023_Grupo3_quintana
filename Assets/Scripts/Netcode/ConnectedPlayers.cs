@@ -233,7 +233,7 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         gameStarted = true;
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
-        LobbyManager.Instance.DeleteLobby();
+        //LobbyManager.Instance.DeleteLobby();
         Timer.SetActive(true);
         Invoke("HideFightSign", 1.5f);
 

@@ -179,15 +179,19 @@ public class LobbyManager : MonoBehaviour
         return joinedLobby;
     }
 
-    //public string GetLobbyName()
-    //{
-    //    return lobbyName;
-    //}
+   public async void LeaveLobby()
+    {
+        if (joinedLobby != null)
+        {
+            try
+            {
+                await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+                joinedLobby = null;
 
-    //public string GetLobbyCode()
-    //{
-    //    return lobbyCode;
-    //}
-    // Start is called before the first frame update
-
+            }catch(LobbyServiceException e)
+            {
+                Debug.Log(e);
+            }
+        }
+    }
 }
