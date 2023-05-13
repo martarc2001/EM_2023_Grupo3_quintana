@@ -9,11 +9,11 @@ manera sincronizada o termine cuando alguien gane.
 - [X] No hay HUD en el juego, que muestre la vida, el tiempo, el nombre del jugador, la
 imagen de los personajes, etc.
 - [X] Los personajes aparecen siempre en el mismo sitio.
-- [ ] Los jugadores no tienen nombre ni pueden elegir personaje.
-- [ ] Los ataques de los personajes no causan daño. Hay que implementar un sistema de
+- [X] Los jugadores no tienen nombre ni pueden elegir personaje.
+- [X] Los ataques de los personajes no causan daño. Hay que implementar un sistema de
 daño.
 - [X] El juego no funciona con un servidor autoritativo.
-- [ ] No hay límite de jugadores.
+- [X] No hay límite de jugadores.
 - [X] No tiene un contador de tiempo para acabar el combate.
 - [ ] Se debe poder jugar partidas adicionales sin reiniciar el servidor.
 - [ ] El servidor no está optimizado.
@@ -39,7 +39,7 @@ ganará el que disponga de más vida.**
 - [ ] **RF05: Si todos los demás jugadores se desconectan, el último jugador conectado debe ganar
 automáticamente.**
 - [ ] RF06: El juego debe permitir distintas rondas para una misma partida.
-- [ ] **RF07: El juego debe mostrar al ganador de la partida al finalizarla.**
+- [X] **RF07: El juego debe mostrar al ganador de la partida al finalizarla.**
 - [ ] RF08: Después de finalizar una partida, el juego debe volver a la sala con los jugadores.
 - [X] **RF09: Los jugadores deben poder elegir un personaje antes de iniciar la partida.**
 - [X] **RF10: Los ataques de los personajes deben causar daño a los adversarios.**
