@@ -243,23 +243,35 @@ namespace Netcode
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
-            //players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
-
             //si el que se ha desconectado es el host
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
             else//si se ha desconectado un cliente
             {
-                if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
+                if (IsOwner)
                 {
-                    try
+                    //Showing disconnection on HUD Interface
+                    showDisconnectionOnInterfaceClientRpc(clientId);
+
+                    if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
                     {
-                        StartCoroutine(wait());
+                        try
+                        {
+                            //solo se calcula el ganador cuando la partida ha empezado
+                            if (ConnectedPlayers.Instance.gameStarted) { StartCoroutine(wait()); }
+                        }
+                        catch (System.Exception ex) { print(ex); }
                     }
-                    catch { }
                 }
             }
             base.OnNetworkDespawn();
+        }
+
+        [ClientRpc]
+        private void showDisconnectionOnInterfaceClientRpc(ulong clientId)
+        {
+            var interfaceOfDisconnectedPlayer = GameObject.Find("Canvas - HUD").transform.GetChild((int)clientId);
+            interfaceOfDisconnectedPlayer.Find("Disconnected").gameObject.SetActive(true);
         }
 
         IEnumerator wait()
