@@ -142,6 +142,7 @@ namespace Netcode
 
                 if (players.alivePlayers.Value == 1)
                 {
+                    ConnectedPlayers.Instance.gameStarted = false;
                     //para calcular quién ha ganado se mira qué jugador queda con mayor vida y se coloca en un networkvariable
                     players.calculateWinner();
                     StartCoroutine(CheckWinCoroutine());
