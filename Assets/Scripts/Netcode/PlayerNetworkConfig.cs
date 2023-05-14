@@ -69,6 +69,8 @@ namespace Netcode
 
             InstantiateOnConnectedPlayersListServerRpc();
 
+            dead.Value = false;
+            life.Value = 100;
         }
 
         [ServerRpc]
@@ -96,13 +98,6 @@ namespace Netcode
             players.alivePlayers.Value += 1;
 
             players.player1 = this;
-
-            print("player nuevo! n de players: " + players.alivePlayers.Value);
-            dead.Value = false;
-
-            life.Value = 100;
-
-
         }
 
         #endregion
@@ -115,7 +110,7 @@ namespace Netcode
                 var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
                 healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
             }
-            catch (Exception ex) { } //Deletion of prefab children can affect these lines, do not remove try-catch
+            catch { } //Deletion of prefab children can affect these lines, do not remove try-catch
             finally
             {
                 var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
