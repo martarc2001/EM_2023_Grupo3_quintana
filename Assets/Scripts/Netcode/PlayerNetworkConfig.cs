@@ -115,7 +115,7 @@ namespace Netcode
                 var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
                 healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
             }
-            catch (Exception ex) { } //Deletion of prefab children can affect these lines, do not remove try-catch
+            catch { } //Deletion of prefab children can affect these lines, do not remove try-catch
             finally
             {
                 var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
