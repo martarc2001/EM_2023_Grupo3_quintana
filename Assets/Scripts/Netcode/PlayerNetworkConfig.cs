@@ -15,6 +15,7 @@ namespace Netcode
         public GameObject characterPrefab;
         public NetworkVariable<int> life;
         public NetworkVariable<bool> dead;//destroyed
+        public NetworkVariable<int> playerNum;
         public ulong following;
 
         public ConnectedPlayers players;
@@ -28,6 +29,7 @@ namespace Netcode
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
             dead.OnValueChanged += OnDeadValueChanged;
             life.OnValueChanged += OnLifeValueChanged;
+            playerNum = new NetworkVariable<int>(0);
 
             following = OwnerClientId;
             serverDespawned = new NetworkVariable<bool>(false);
@@ -101,9 +103,29 @@ namespace Netcode
             dead.Value = false;
 
             life.Value = 100;
-
+            playerNum.Value = SetPlayerNum(OwnerClientId);
+            Debug.Log("PLAYER NETWORK CONFIG: " + playerNum.Value);
 
         }
+
+        public int SetPlayerNum(ulong clientId)
+        {
+            Transform HUD = GameObject.Find("Canvas - HUD").transform;
+            for (int i = 0; i < HUD.childCount; i++)
+            {
+                if (HUD.GetChild(i).gameObject.activeSelf)
+                {
+                    if (HUD.GetChild(i).Find("Disconnected").gameObject.activeSelf)
+                    {
+                        return i;
+                    }
+                }
+                else return i;
+
+            }
+            return HUD.childCount;
+        }
+
 
         #endregion
 
@@ -245,7 +267,7 @@ namespace Netcode
             LobbyManager.Instance.LeaveLobby();
 
             //si el que se ha desconectado es el host
-            if (!ConnectedPlayers.Instance.gameStarted) return;
+            //if (!ConnectedPlayers.Instance.gameStarted) return;                                                                                               //LINEA DE ISA, VOLVER A PONER
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
             else//si se ha desconectado un cliente
@@ -273,6 +295,7 @@ namespace Netcode
         [ClientRpc]
         private void showDisconnectionOnInterfaceClientRpc(ulong clientId)
         {
+
             var interfaceOfDisconnectedPlayer = GameObject.Find("Canvas - HUD").transform.GetChild((int)clientId);
             interfaceOfDisconnectedPlayer.Find("Disconnected").gameObject.SetActive(true);
         }
