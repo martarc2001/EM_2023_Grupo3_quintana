@@ -16,6 +16,7 @@ namespace Netcode
         public NetworkVariable<int> life;
         public NetworkVariable<bool> dead;//destroyed
         public ulong following;
+        public string name;
 
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
@@ -37,7 +38,8 @@ namespace Netcode
             ChangeMaxPlayerServerRpc();
 
             if (!IsOwner) return;
-
+            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
+            name = prefabName;
             Spawning();
 
             Invoke("ShowReadyPlayers", 1.0f);
@@ -64,9 +66,8 @@ namespace Netcode
         #region Creating Prefab
         public void Spawning()
         {
-            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
-            ChangeCharacterServerRpc(OwnerClientId, prefabName);
-
+            
+            ChangeCharacterServerRpc(OwnerClientId, name);
             InstantiateOnConnectedPlayersListServerRpc();
 
         }
@@ -206,14 +207,24 @@ namespace Netcode
             yield return new WaitForSeconds(3.0f);
             CheckWinClientRpc(false);
         }
-
+        IEnumerator RestartCoroutine()
+        {
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+            yield return new WaitForSeconds(5.0f);
+            players.RestartServerRpc();
+        }
+       
 
         [ClientRpc]
         public void CheckWinClientRpc(bool tie)
         {
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             //tie es true cuando ha quedado mas de un personaje vivo
-
+            if (IsServer)
+            {
+                StartCoroutine(RestartCoroutine());
+            }
+         
             if (tie)
             {
                 players.showEmpate();

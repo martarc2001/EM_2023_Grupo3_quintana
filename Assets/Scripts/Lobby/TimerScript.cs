@@ -13,7 +13,13 @@ public class TimerScript : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        TimeLeft = 5;
         TimerOn=true;
+    }
+    public void restart()
+    {
+        TimeLeft = 5;
+        TimerOn = true;
     }
 
     // Update is called once per frame

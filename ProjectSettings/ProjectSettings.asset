@@ -819,11 +819,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 1
-  cloudProjectId: 71538513-7d8c-4784-8826-fcf5d354109d
+  cloudProjectId: 1c320fcf-a6aa-4bdd-a0cf-6550fc2358ad
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: EntornosMultijugadorPractica
-  organizationId: isaeo22
+  projectName: pusi
+  organizationId: elenalopez
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 

@@ -6,9 +6,11 @@ using TMPro;
 using Unity.Collections;
 using UnityEngine.InputSystem;
 using Netcode;
+using static UnityEngine.InputSystem.HID.HID;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
+
     public NetworkVariable<int> readyPlayers = new NetworkVariable<int>();
 
     public NetworkVariable<int> alivePlayers;
@@ -70,6 +72,7 @@ public class ConnectedPlayers : NetworkBehaviour
             }
         }
     }
+
 
     [ServerRpc]
     public void counterServerRpc()
@@ -175,7 +178,34 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
+    [ServerRpc]
+    public void RestartServerRpc()
+    {
+        winnerName = new NetworkVariable<FixedString32Bytes>("");
+        error.SetActive(false);
+        seconds = 30;
+       
+        readyPlayers.Value = 0;
+        Timer.SetActive(false);
+        gameStarted = false;
+        
+        restartClientRpc();
+        
+    }
+    [ClientRpc]
+    public void restartClientRpc()
+    {
+        player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
+        player1.Spawning();
+        imgGanar.SetActive(false);
+        imgPerder.SetActive(false);
+        imgEmpate.SetActive(false);
+        LobbyWaiting.Instance.gameObject.SetActive(true);
+        LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
+        error.SetActive(false);
+        WinText.text = " ";
 
+    }
     public void showGanar() { imgGanar.SetActive(true); }
     public void showPerder() { imgPerder.SetActive(true); }
     public void showEmpate() { imgEmpate.SetActive(true); }
@@ -195,7 +225,7 @@ public class ConnectedPlayers : NetworkBehaviour
         if (readyPlayers.Value == LobbyManager.Instance.maxPlayers)
         {
             WaitCountdown();
-
+            GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
         }
     }
 
