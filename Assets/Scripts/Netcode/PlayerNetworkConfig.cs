@@ -66,10 +66,12 @@ namespace Netcode
         #region Creating Prefab
         public void Spawning()
         {
+            InstantiateOnConnectedPlayersListServerRpc();
+
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
 
-            InstantiateOnConnectedPlayersListServerRpc();
+
 
         }
 
@@ -85,7 +87,7 @@ namespace Netcode
         public void ChangeCharacterServerRpc(ulong id, string prefabName)
         {
             GameObject prefab = Resources.Load<GameObject>(prefabName);
-            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
+            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild(playerNum.Value).transform);
             characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(id);
             characterPrefab.transform.SetParent(transform, false);
 
@@ -104,7 +106,7 @@ namespace Netcode
 
             life.Value = 100;
             playerNum.Value = SetPlayerNum(OwnerClientId);
-            Debug.Log("PLAYER NETWORK CONFIG: " + playerNum.Value);
+            players.d_clientIdRefersToPlayerNum.Add(OwnerClientId, playerNum.Value);
 
         }
 
@@ -140,7 +142,7 @@ namespace Netcode
             catch { } //Deletion of prefab children can affect these lines, do not remove try-catch
             finally
             {
-                var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("HealthBar");
+                var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild(playerNum.Value).Find("HealthBar");
                 healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
             }
 
@@ -275,7 +277,7 @@ namespace Netcode
                 if (IsOwner)
                 {
                     //Showing disconnection on HUD Interface
-                    showDisconnectionOnInterfaceClientRpc(clientId);
+                    showDisconnectionOnInterfaceServerRpc(clientId);
 
                     if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
                     {
@@ -292,11 +294,17 @@ namespace Netcode
             base.OnNetworkDespawn();
         }
 
-        [ClientRpc]
-        private void showDisconnectionOnInterfaceClientRpc(ulong clientId)
+        [ServerRpc]
+        private void showDisconnectionOnInterfaceServerRpc(ulong clientId)
         {
+            int disconnectedPlayerNum = players.d_clientIdRefersToPlayerNum[clientId];
+            showDisconnectionOnInterfaceClientRpc(disconnectedPlayerNum);
 
-            var interfaceOfDisconnectedPlayer = GameObject.Find("Canvas - HUD").transform.GetChild((int)clientId);
+        }
+        [ClientRpc]
+        private void showDisconnectionOnInterfaceClientRpc(int num)
+        {
+            var interfaceOfDisconnectedPlayer = GameObject.Find("Canvas - HUD").transform.GetChild(num);
             interfaceOfDisconnectedPlayer.Find("Disconnected").gameObject.SetActive(true);
         }
 

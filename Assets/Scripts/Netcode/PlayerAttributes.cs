@@ -42,7 +42,6 @@ public class PlayerAttributes : NetworkBehaviour
     {
         playerName = nameInInputText;
         ChangeInitialSettingsClientRpc(playerName);
-        Debug.Log("PLAYER ATTRIBUTES: " + transform.GetComponent<PlayerNetworkConfig>().playerNum.Value);
     }
 
 
