@@ -51,6 +51,9 @@ namespace Netcode
 
 
         #region Lobby
+
+    
+
         [ServerRpc(RequireOwnership = false)]
         void ChangeMaxPlayerServerRpc() { ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); }
 
@@ -242,8 +245,8 @@ namespace Netcode
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
-            LobbyManager.Instance.LeaveLobby();
-
+           
+          
             //si el que se ha desconectado es el host
             if (!ConnectedPlayers.Instance.gameStarted) return;
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
