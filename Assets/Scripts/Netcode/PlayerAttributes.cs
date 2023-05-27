@@ -50,6 +50,7 @@ public class PlayerAttributes : NetworkBehaviour
     [ClientRpc]
     void ChangeInitialSettingsClientRpc(string playerName)
     {
+        print(playerName);
         transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName; //Changing the name on prefab only
 
     }

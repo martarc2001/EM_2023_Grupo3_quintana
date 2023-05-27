@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UI;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,7 +21,7 @@ namespace Netcode
 
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
-
+        public NetworkVariable<FixedString32Bytes> serverCharName;
         public static PlayerNetworkConfig Instance { get; private set; }
 
         private void Awake() { Instance = this; }
@@ -40,6 +41,7 @@ namespace Netcode
             if (!IsOwner) return;
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             charName = prefabName;
+            serverCharName = new NetworkVariable<FixedString32Bytes>(prefabName);
             Spawning();
 
             Invoke("ShowReadyPlayers", 1.0f);
@@ -66,7 +68,7 @@ namespace Netcode
         #region Creating Prefab
         public void Spawning()
         {
-         
+           
             ChangeCharacterServerRpc(OwnerClientId, charName);
             InstantiateOnConnectedPlayersListServerRpc();
 
@@ -212,6 +214,7 @@ namespace Netcode
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             yield return new WaitForSeconds(5.0f);
             players.RestartServerRpc();
+
         }
        
 

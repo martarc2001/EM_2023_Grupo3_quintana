@@ -188,13 +188,27 @@ public class ConnectedPlayers : NetworkBehaviour
         seconds = 30;
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
+
             var player = client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>();
-            string prefabName = player.charName;
+            print(player);
+            print(player.charName);
+            print(player.serverCharName.Value);
+            if (player.dead.Value) {
+                print("aaaa");
+                player.dead.Value = false;
+                //oni(clone)
+                //huntress(clone)
+                //azai kaze(clone)
+
+                string prefabName = player.characterPrefab.name;
+            prefabName.Substring(0, prefabName.Length - 7);
+            prefabName = player.serverCharName.Value.ToString();
             GameObject characterPrefab = player.characterPrefab;
             GameObject prefab = Resources.Load<GameObject>(prefabName);
             characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
             characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
             characterPrefab.transform.SetParent(transform, false);
+            }
         }
 
         readyPlayers.Value = 0;
