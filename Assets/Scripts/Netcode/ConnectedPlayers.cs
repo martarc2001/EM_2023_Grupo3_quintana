@@ -21,6 +21,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
     public GameObject leftLobbyMessage;
+    public Dictionary<ulong, int> d_clientIdRefersToPlayerNum = new Dictionary<ulong, int>();
 
     public GameObject imgGanar;
     public GameObject imgPerder;
@@ -227,7 +228,8 @@ public class ConnectedPlayers : NetworkBehaviour
 
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
-            SetGameStartPosition((int)client.ClientId);
+            //SetGameStartPosition((int)client.ClientId);
+            SetGameStartPosition((int)client.ClientId, client.PlayerObject.GetComponent<PlayerNetworkConfig>().playerNum.Value);
             print((int)client.ClientId);
 
         }
@@ -243,9 +245,9 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
     }
 
-    public void SetGameStartPosition(int idClient)
+    public void SetGameStartPosition(int idClient, int pos)
     {
-        allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[idClient];
+        allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[pos];
     }
     #endregion
 

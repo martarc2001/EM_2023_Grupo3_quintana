@@ -1,4 +1,5 @@
 using Cinemachine;
+using Netcode;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -10,9 +11,6 @@ using UnityEngine.UI;
 
 public class PlayerAttributes : NetworkBehaviour
 {
-    //Vida
-    const int MAX_HP = 100;
-    NetworkVariable<int> HP = new NetworkVariable<int>(MAX_HP);
 
     //Nombre y sprite  
     string playerName;
@@ -24,7 +22,7 @@ public class PlayerAttributes : NetworkBehaviour
     Color red = new Color(1, 0, 0, 0.35f);
     Color green = new Color(0, 1, 0, 0.35f);
     Color blue = new Color(0, 0, 1, 0.35f);
-    
+
 
     void Start()
     {
@@ -65,6 +63,7 @@ public class PlayerAttributes : NetworkBehaviour
         var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild(thisClientID);
         string otherPlayerSelectedSkin = transform.GetChild(0).gameObject.name.Replace("(Clone)", ""); //When instancing the prefab it shows up as "Huntress(Clone)", removing "(Clone)" for it to be easier to read
         otherPlayerInterface.gameObject.SetActive(true);
+        otherPlayerInterface.Find("Disconnected").gameObject.SetActive(false);//Deactivating it in case someone in that position previously disconnected
         otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = playerName;
 
         switch (otherPlayerSelectedSkin)
@@ -92,10 +91,13 @@ public class PlayerAttributes : NetworkBehaviour
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
         {
             string name = client.PlayerObject.GetComponentInChildren<PlayerAttributes>().playerName;
-            client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(name, (int)client.ClientId);
-            Debug.Log("Cliente: " + client.ClientId);
+            int playerNum = client.PlayerObject.GetComponent<PlayerNetworkConfig>().playerNum.Value;
+            client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(name, playerNum);
         }
     }
+
+
+
 
 
 }
