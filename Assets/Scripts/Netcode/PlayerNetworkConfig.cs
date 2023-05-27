@@ -41,7 +41,7 @@ namespace Netcode
             if (!IsOwner) return;
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             charName = prefabName;
-            serverCharName = new NetworkVariable<FixedString32Bytes>(prefabName);
+          
             Spawning();
 
             Invoke("ShowReadyPlayers", 1.0f);
@@ -95,6 +95,8 @@ namespace Netcode
         [ServerRpc]
         public void InstantiateOnConnectedPlayersListServerRpc()
         {
+            serverCharName = new NetworkVariable<FixedString32Bytes>(charName);
+
             players.allPlayers.Add(this);
             players.alivePlayers.Value += 1;
 

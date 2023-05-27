@@ -15,11 +15,11 @@ public class PlayerAttributes : NetworkBehaviour
     NetworkVariable<int> HP = new NetworkVariable<int>(MAX_HP);
 
     //Nombre y sprite  
-    string playerName;
+    public string playerName;
     [SerializeField] private GameObject AkaiKazePrefab;
     [SerializeField] private GameObject OniPrefab;
     [SerializeField] private GameObject HuntressPrefab;
-
+    public string charaSkin;
     //HUD Interface Colors
     Color red = new Color(1, 0, 0, 0.35f);
     Color green = new Color(0, 1, 0, 0.35f);
@@ -55,8 +55,11 @@ public class PlayerAttributes : NetworkBehaviour
 
     }
 
+
+
+
     [ClientRpc]
-    void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
+   public void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
     {
         //Changing the name on prefab
         transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
@@ -65,6 +68,7 @@ public class PlayerAttributes : NetworkBehaviour
         //Changing name and interface appearance
         var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild(thisClientID);
         string otherPlayerSelectedSkin = transform.GetChild(0).gameObject.name.Replace("(Clone)", ""); //When instancing the prefab it shows up as "Huntress(Clone)", removing "(Clone)" for it to be easier to read
+        charaSkin = otherPlayerSelectedSkin;
         otherPlayerInterface.gameObject.SetActive(true);
         otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = playerName;
 

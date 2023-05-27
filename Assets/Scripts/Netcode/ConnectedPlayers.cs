@@ -189,26 +189,30 @@ public class ConnectedPlayers : NetworkBehaviour
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
 
-            var player = client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>();
+            var player = client.PlayerObject.GetComponent<PlayerNetworkConfig>();
+            var config = client.PlayerObject.GetComponent<PlayerAttributes>();
+
             print(player);
             print(player.charName);
             print(player.serverCharName.Value);
+
             if (player.dead.Value) {
                 print("aaaa");
                 player.dead.Value = false;
                 //oni(clone)
                 //huntress(clone)
                 //azai kaze(clone)
+           
+            string prefabName = config.charaSkin;
 
-                string prefabName = player.characterPrefab.name;
-            prefabName.Substring(0, prefabName.Length - 7);
-            prefabName = player.serverCharName.Value.ToString();
             GameObject characterPrefab = player.characterPrefab;
             GameObject prefab = Resources.Load<GameObject>(prefabName);
             characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
             characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
-            characterPrefab.transform.SetParent(transform, false);
+            characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
+            client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(config.playerName, (int)client.ClientId);
             }
+
         }
 
         readyPlayers.Value = 0;
