@@ -16,7 +16,7 @@ namespace Netcode
         public NetworkVariable<int> life;
         public NetworkVariable<bool> dead;//destroyed
         public ulong following;
-        public string name;
+        public string charName;
 
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
@@ -39,7 +39,7 @@ namespace Netcode
 
             if (!IsOwner) return;
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
-            name = prefabName;
+            charName = prefabName;
             Spawning();
 
             Invoke("ShowReadyPlayers", 1.0f);
@@ -66,8 +66,8 @@ namespace Netcode
         #region Creating Prefab
         public void Spawning()
         {
-            
-            ChangeCharacterServerRpc(OwnerClientId, name);
+         
+            ChangeCharacterServerRpc(OwnerClientId, charName);
             InstantiateOnConnectedPlayersListServerRpc();
 
         }

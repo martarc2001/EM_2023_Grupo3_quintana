@@ -125,6 +125,7 @@ public class ConnectedPlayers : NetworkBehaviour
         //EMPATE
         if (winningLife == loosingLife)
         {
+
             player1.CheckWinClientRpc(true);
         }
         else
@@ -178,25 +179,36 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
-    [ServerRpc]
+    [ServerRpc (RequireOwnership = false)]
     public void RestartServerRpc()
     {
+        restartClientRpc();
         winnerName = new NetworkVariable<FixedString32Bytes>("");
         error.SetActive(false);
         seconds = 30;
-       
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            var player = client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>();
+            string prefabName = player.charName;
+            GameObject characterPrefab = player.characterPrefab;
+            GameObject prefab = Resources.Load<GameObject>(prefabName);
+            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
+            characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
+            characterPrefab.transform.SetParent(transform, false);
+        }
+
         readyPlayers.Value = 0;
         Timer.SetActive(false);
         gameStarted = false;
         
-        restartClientRpc();
+
+     
         
     }
     [ClientRpc]
     public void restartClientRpc()
     {
-        player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
-        player1.Spawning();
+        Timer.SetActive(false);
         imgGanar.SetActive(false);
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
