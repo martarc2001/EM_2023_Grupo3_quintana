@@ -292,8 +292,17 @@ namespace Netcode
             LobbyManager.Instance.LeaveLobby();
 
             //Showing disconnection on HUD Interface
-            if (IsOwner) showDisconnectionOnInterfaceServerRpc(clientId);
+            if (IsOwner)//We want only to enter once through this method
+            {
+                showDisconnectionOnInterfaceServerRpc(clientId);
 
+                if (IsServer)
+                {
+                    players.alivePlayers.Value -= 1;
+                    Debug.Log("ALIVEPLAYERS: " + players.alivePlayers.Value);
+                }
+
+            }
 
             //si el que se ha desconectado es el host
             if (!ConnectedPlayers.Instance.gameStarted) return;
