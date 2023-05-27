@@ -71,8 +71,6 @@ namespace Netcode
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             ChangeCharacterServerRpc(OwnerClientId, prefabName);
 
-
-
         }
 
         [ServerRpc]
@@ -98,19 +96,16 @@ namespace Netcode
         {
             players.allPlayers.Add(this);
             players.alivePlayers.Value += 1;
-
             players.player1 = this;
 
-            print("player nuevo! n de players: " + players.alivePlayers.Value);
             dead.Value = false;
 
-            life.Value = 100;
-            playerNum.Value = SetPlayerNum(OwnerClientId);
+            playerNum.Value = SetPlayerNum();
             players.d_clientIdRefersToPlayerNum.Add(OwnerClientId, playerNum.Value);
-
+            life.Value = 100;
         }
 
-        public int SetPlayerNum(ulong clientId)
+        public int SetPlayerNum()
         {
             Transform HUD = GameObject.Find("Canvas - HUD").transform;
             for (int i = 0; i < HUD.childCount; i++)
@@ -138,21 +133,31 @@ namespace Netcode
             {
                 var healthBarToEdit = transform.GetChild(0).Find("HUD").Find("HealthBar");
                 healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+
             }
             catch { } //Deletion of prefab children can affect these lines, do not remove try-catch
             finally
             {
-                var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild(playerNum.Value).Find("HealthBar");
-                healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+                changeLifeInterfaceServerRpc(OwnerClientId, newValue);
+
             }
 
         }
 
-        [ClientRpc]
-        public void UpdateHealthBarClientRpc(float fillAmount)
+        [ServerRpc(RequireOwnership = false)]
+        public void changeLifeInterfaceServerRpc(ulong id, int newValue)
         {
-            transform.GetChild(0).Find("HUD").Find("HealthBar").Find("Green").GetComponent<Image>().fillAmount = fillAmount;
+            int numPlayerToUpdate = players.d_clientIdRefersToPlayerNum[id];
+            changeLifeInterfaceClientRpc(newValue, numPlayerToUpdate);
         }
+
+        [ClientRpc]
+        public void changeLifeInterfaceClientRpc(int newValue, int numHealthBarToUpdate)
+        {
+            var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild(numHealthBarToUpdate).Find("HealthBar");
+            healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
+        }
+
 
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
@@ -176,7 +181,9 @@ namespace Netcode
 
         }
 
+        #endregion
 
+        #region Getting killed
         /// <summary>
         /// Used to change the camera to other player prefab when getting killed, also destroying its prefab
         /// </summary>
@@ -208,15 +215,31 @@ namespace Netcode
             }
 
             //HUD Interface
-            var background = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("BG");
-            background.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.35f);
-            var sprite = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("Sprite");
-            sprite.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.5f);
+            changeInterfaceWhenKilledServerRpc(OwnerClientId);
 
             //Deleting character prefab
             DestroyCharacter();
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        public void changeInterfaceWhenKilledServerRpc(ulong id)
+        {
+            int numPlayerToUpdate = players.d_clientIdRefersToPlayerNum[id];
+            changeInterfaceWhenKilledClientRpc(numPlayerToUpdate);
+        }
+
+        [ClientRpc]
+        public void changeInterfaceWhenKilledClientRpc(int bannerToUpdate)
+        {
+            var background = GameObject.Find("Canvas - HUD").transform.GetChild(bannerToUpdate).Find("BG");
+            background.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.35f);
+            var sprite = GameObject.Find("Canvas - HUD").transform.GetChild(bannerToUpdate).Find("Sprite");
+            sprite.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.5f);
+        }
+
+        #endregion
+
+        #region Winning or losing
         public void DestroyCharacter()
         {
             for (var i = this.transform.childCount - 1; i >= 0; i--)
@@ -268,17 +291,18 @@ namespace Netcode
         {
             LobbyManager.Instance.LeaveLobby();
 
+            //Showing disconnection on HUD Interface
+            if (IsOwner) showDisconnectionOnInterfaceServerRpc(clientId);
+
+
             //si el que se ha desconectado es el host
-            //if (!ConnectedPlayers.Instance.gameStarted) return;                                                                                               //LINEA DE ISA, VOLVER A PONER
+            if (!ConnectedPlayers.Instance.gameStarted) return;
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
             else//si se ha desconectado un cliente
             {
                 if (IsOwner)
                 {
-                    //Showing disconnection on HUD Interface
-                    showDisconnectionOnInterfaceServerRpc(clientId);
-
                     if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
                     {
                         try
@@ -297,6 +321,8 @@ namespace Netcode
         [ServerRpc]
         private void showDisconnectionOnInterfaceServerRpc(ulong clientId)
         {
+            //Since it has been deleted due to disconnected, we cannot get playerNum straigh away
+            //Dictionary is used to store that playerNum assigned to that client
             int disconnectedPlayerNum = players.d_clientIdRefersToPlayerNum[clientId];
             showDisconnectionOnInterfaceClientRpc(disconnectedPlayerNum);
 
