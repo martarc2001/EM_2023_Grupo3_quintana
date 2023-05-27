@@ -16,6 +16,9 @@ namespace Netcode
         public NetworkVariable<int> life;
         public NetworkVariable<bool> dead;//destroyed
         public ulong following;
+        
+        //public NetworkVariable<bool> isReady=new NetworkVariable<bool>(false);
+      
 
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
@@ -49,10 +52,24 @@ namespace Netcode
 
         }
 
+        private void Update()
+        {
+           
+        }
 
         #region Lobby
 
-    
+        [ClientRpc]
+        void ShowReadyPlayersButtonClientRpc()
+        {
+            
+                GameObject instance = Instantiate(LobbyManager.Instance.leftLobbyMessage);
+                Destroy(instance, 1f);
+                LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
+          
+        }
+
+
 
         [ServerRpc(RequireOwnership = false)]
         void ChangeMaxPlayerServerRpc() { ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); }
@@ -245,9 +262,30 @@ namespace Netcode
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
+            if (IsLocalPlayer)
+            {
+         
+                LobbyManager.Instance.LeaveLobby();
+            }
            
+
+            if (IsServer) {
+                ConnectedPlayers.Instance.readyPlayers.Value = 0;
+                LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
+                GameObject instance=Instantiate(LobbyManager.Instance.leftLobbyMessage);
+                Destroy(instance, 1f);
+                try
+                {
+                    ShowReadyPlayersButtonClientRpc();
+                }
+                catch
+                {
+                    Debug.Log("No quedan clientes");
+                }
+              
+            }
           
-            //si el que se ha desconectado es el host
+           
             if (!ConnectedPlayers.Instance.gameStarted) return;
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 

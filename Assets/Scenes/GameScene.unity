@@ -1129,6 +1129,7 @@ MonoBehaviour:
   winner: {fileID: 1076761121}
   WinText: {fileID: 0}
   allPlayers: []
+  leftLobbyMessage: {fileID: 0}
   imgGanar: {fileID: 716096044}
   imgPerder: {fileID: 940914401}
   imgEmpate: {fileID: 1976874043}
@@ -1263,6 +1264,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxPlayers: 2
+  leftLobbyMessage: {fileID: 2710313139574943778, guid: ee5b21d4e6d82704dae4fb715a44a15a, type: 3}
 --- !u!4 &214305265
 Transform:
   m_ObjectHideFlags: 0

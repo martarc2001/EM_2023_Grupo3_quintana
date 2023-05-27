@@ -14,8 +14,8 @@ public class LobbyManager : MonoBehaviour
     public int maxPlayers;
     public Lobby joinedLobby;
     private float heartBeatTimer;
-  
-    
+    public GameObject leftLobbyMessage;
+
     public static LobbyManager Instance { get; private set; }
 
     

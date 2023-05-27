@@ -20,6 +20,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public GameObject winner;
     public TextMeshProUGUI WinText;
     public List<Netcode.PlayerNetworkConfig> allPlayers;
+    public GameObject leftLobbyMessage;
 
     public GameObject imgGanar;
     public GameObject imgPerder;
@@ -198,6 +199,8 @@ public class ConnectedPlayers : NetworkBehaviour
 
         }
     }
+
+
 
     void WaitCountdown()
     {

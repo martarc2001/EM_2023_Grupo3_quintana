@@ -21,8 +21,17 @@ public class LobbyWaiting : MonoBehaviour
     {
        //Ddesactivar el input systema de alguna manera
         Instance = this;
-        readyButton.onClick.AddListener(() => ConnectedPlayers.Instance.ShowReadyPlayersServerRpc());
+        readyButton.onClick.AddListener(() => {
+
+            //IsReadyServerRpc();
+             
+            ConnectedPlayers.Instance.ShowReadyPlayersServerRpc(); });
         readyButton.onClick.AddListener(() => readyButton.gameObject.SetActive(false));
     }
 
+    //[ServerRpc]
+    //void IsReadyServerRpc()
+    //{
+    //    PlayerNetworkConfig.Instance.isReady.Value = true;
+    //}
 }
