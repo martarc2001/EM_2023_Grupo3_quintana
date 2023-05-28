@@ -194,11 +194,7 @@ public class ConnectedPlayers : NetworkBehaviour
         readyPlayers.Value++;
         LobbyWaiting.Instance.waitingText.text = "Waiting for players " + readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready";
 
-        if (readyPlayers.Value == LobbyManager.Instance.maxPlayers)
-        {
-            WaitCountdown();
-
-        }
+        if (readyPlayers.Value == LobbyManager.Instance.maxPlayers) { WaitCountdown(); }
     }
 
 
@@ -215,6 +211,7 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         LobbyWaiting.Instance.gameObject.SetActive(false);
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
+        GameObject.Find("Canvas").GetComponentInChildren<TimerScript>().startTimer();
     }
 
     [ServerRpc(RequireOwnership = false)]
