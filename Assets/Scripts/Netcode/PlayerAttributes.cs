@@ -61,35 +61,43 @@ public class PlayerAttributes : NetworkBehaviour
     [ClientRpc]
    public void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
     {
-        
+
         //Changing the name on prefab
-        transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
-
-
-        //Changing name and interface appearance
-        var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild(thisClientID);
-        string otherPlayerSelectedSkin = transform.GetChild(0).gameObject.name.Replace("(Clone)", ""); //When instancing the prefab it shows up as "Huntress(Clone)", removing "(Clone)" for it to be easier to read
-        charaSkin = otherPlayerSelectedSkin;
-        otherPlayerInterface.gameObject.SetActive(true);
-        otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = playerName;
-
-        switch (otherPlayerSelectedSkin)
+        try
         {
-            case "Huntress":
-                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = green;
-                otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
-                break;
-            case "Oni":
-                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = blue;
-                otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
-                break;
-            default://"AkaiKaze"
-                otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = red;
-                otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
-                break;
-        }
+            transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
+            string otherPlayerSelectedSkin = transform.GetChild(0).gameObject.name.Replace("(Clone)", ""); //When instancing the prefab it shows up as "Huntress(Clone)", removing "(Clone)" for it to be easier to read
 
+            //Changing name and interface appearance
+            var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild(thisClientID);
+            
+            charaSkin = otherPlayerSelectedSkin;
+            otherPlayerInterface.gameObject.SetActive(true);
+            otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = playerName;
+
+            switch (otherPlayerSelectedSkin)
+            {
+                case "Huntress":
+                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = green;
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
+                    break;
+                case "Oni":
+                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = blue;
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
+                    break;
+                default://"AkaiKaze"
+                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = red;
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
+                    break;
+            }
+
+
+        }
+        catch { }
     }
+      
+
+    
 
 
     [ServerRpc]

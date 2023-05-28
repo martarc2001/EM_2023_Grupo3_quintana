@@ -140,7 +140,7 @@ public class ConnectedPlayers : NetworkBehaviour
                 {
                     alivePlayers.Value -= 1;
 
-                    allPlayers[i].DestroyCharacter();
+                    allPlayers[i].dead.Value = true;
 
                 }
             }
@@ -167,6 +167,7 @@ public class ConnectedPlayers : NetworkBehaviour
         {
             gameStarted = false;
 
+
             allPlayers.Clear();
             foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
             {
@@ -181,7 +182,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
-    [ServerRpc ]
+    [ServerRpc]
     public void RestartServerRpc()
     {
         winnerName = new NetworkVariable<FixedString32Bytes>("");
@@ -191,56 +192,41 @@ public class ConnectedPlayers : NetworkBehaviour
         Timer.SetActive(false);
         gameStarted = false;
 
-        //if (NetworkManager.Singleton.IsServer)
-        //{
-        //    foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
-        //    {
-        //        if (!IsServer)
-        //        {
-        //            NetworkManager.Singleton.DisconnectClient(client.ClientId);
-        //        }
-        //    }
-          
-          
-        //}
-      
-
-
-
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
 
             var player = client.PlayerObject.GetComponent<PlayerNetworkConfig>();
             var config = client.PlayerObject.GetComponent<PlayerAttributes>();
 
-             print(player);
-             print(player.charName);
-             print(player.serverCharName.Value);
+            print(player);
+            print(player.charName);
+            print(player.serverCharName.Value);
 
-           if (player.dead.Value) {
+            if (player.dead.Value)
+            {
                 print("aaaa");
-            player.dead.Value = false;
-          
-          
-                  string prefabName = config.charaSkin;
+                player.dead.Value = false;
+
+
+                string prefabName = config.charaSkin;
                 GameObject characterPrefab = player.characterPrefab;
                 GameObject prefab = Resources.Load<GameObject>(prefabName);
-                characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int) OwnerClientId).transform);
+                characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
                 characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
                 player.characterPrefab = characterPrefab;
                 characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
-               
-               
+                player.restartcamerasClientRpc(client.ClientId);
+
             }
             restartClientRpc(client.ClientId);
-            config.ChangeInitialSettingsClientRpc(config.playerName,(int)client.ClientId);
+            config.ChangeInitialSettingsClientRpc(config.playerName, (int)client.ClientId);
             config.GetSettingsFromPreviousPlayersServerRpc();
         }
-       
+
     }
- 
+
     //CHARACTERPREFAB, PREFABNAME, PLAYERNAME
-        [ClientRpc]
+    [ClientRpc]
     public void restartClientRpc(ulong id)
     {
         LobbyWaiting.Instance.gameObject.SetActive(true);
@@ -250,10 +236,10 @@ public class ConnectedPlayers : NetworkBehaviour
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
 
-       // UIHandler.Instance.InstantiateClient();
+        // UIHandler.Instance.InstantiateClient();
         error.SetActive(false);
         WinText.text = " ";
-       
+
 
 
     }

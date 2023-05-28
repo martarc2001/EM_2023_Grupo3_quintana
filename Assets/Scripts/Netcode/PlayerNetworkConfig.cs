@@ -42,7 +42,7 @@ namespace Netcode
             if (!IsOwner) return;
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             charName = prefabName;
-          
+            charName = transform.GetComponent<PlayerAttributes>().charaSkin;
             Spawning();
 
             Invoke("ShowReadyPlayers", 1.0f);
@@ -54,44 +54,44 @@ namespace Netcode
 
         }
 
-
-
-        [ClientRpc]
-        public void restartskinsClientRpc(ulong id, string skin, string name) {
-
-       
         
-            characterPrefab.transform.SetParent(transform, false);
-            characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text = name;
-            //client.PlayerObject.GetComponent<PlayerAttributes>().ChangeInitialSettingsClientRpc(config.playerName, (int) client.ClientId);
-            print(characterPrefab);
-            print(characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text);
-            var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)id);
-            otherPlayerInterface.gameObject.SetActive(true);
-            otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = name;
-            print(skin);
-            print(name);
 
-            switch (skin)
-            {
-                case "Huntress":
-                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 1, 0, 0.35f);
-                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
-                    break;
-                case "Oni":
-                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 0, 1, 0.35f);
-                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
-                    break;
-                default://"AkaiKaze"
-                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(1, 0, 0, 0.35f);
-                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
-                    break;
-            }
-        }
+            //[ClientRpc]
+            //public void restartskinsClientRpc(ulong id, string skin, string name) {
 
 
-        #region Lobby
-        [ServerRpc(RequireOwnership = false)]
+
+            //    characterPrefab.transform.SetParent(transform, false);
+            //    characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text = name;
+            //    //client.PlayerObject.GetComponent<PlayerAttributes>().ChangeInitialSettingsClientRpc(config.playerName, (int) client.ClientId);
+            //    print(characterPrefab);
+            //    print(characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text);
+            //    var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)id);
+            //    otherPlayerInterface.gameObject.SetActive(true);
+            //    otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = name;
+            //    print(skin);
+            //    print(name);
+
+            //    switch (skin)
+            //    {
+            //        case "Huntress":
+            //            otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 1, 0, 0.35f);
+            //            otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
+            //            break;
+            //        case "Oni":
+            //            otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 0, 1, 0.35f);
+            //            otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
+            //            break;
+            //        default://"AkaiKaze"
+            //            otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(1, 0, 0, 0.35f);
+            //            otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
+            //            break;
+            //    }
+            //}
+
+
+            #region Lobby
+            [ServerRpc(RequireOwnership = false)]
         void ChangeMaxPlayerServerRpc() { ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); }
 
         [ClientRpc]
@@ -127,6 +127,8 @@ namespace Netcode
             characterPrefab.transform.SetParent(transform, false);
 
         }
+
+        
 
         [ServerRpc]
         public void InstantiateOnConnectedPlayersListServerRpc()
@@ -191,6 +193,16 @@ namespace Netcode
                 }
             }
 
+        }
+        [ClientRpc]
+        public void restartcamerasClientRpc(ulong id)
+        {
+     
+            following = id;
+            ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
+                print(virtualCamera.Follow);
+            virtualCamera.Follow = characterPrefab.transform;
+            
         }
 
 
