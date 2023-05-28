@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UI;
 using Unity.Collections;
 using Unity.Netcode;
@@ -51,6 +52,41 @@ namespace Netcode
             };
 
 
+        }
+
+
+
+        [ClientRpc]
+        public void restartskinsClientRpc(ulong id, string skin, string name) {
+
+       
+        
+            characterPrefab.transform.SetParent(transform, false);
+            characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text = name;
+            //client.PlayerObject.GetComponent<PlayerAttributes>().ChangeInitialSettingsClientRpc(config.playerName, (int) client.ClientId);
+            print(characterPrefab);
+            print(characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text);
+            var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)id);
+            otherPlayerInterface.gameObject.SetActive(true);
+            otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = name;
+            print(skin);
+            print(name);
+
+            switch (skin)
+            {
+                case "Huntress":
+                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 1, 0, 0.35f);
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
+                    break;
+                case "Oni":
+                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 0, 1, 0.35f);
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
+                    break;
+                default://"AkaiKaze"
+                    otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(1, 0, 0, 0.35f);
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
+                    break;
+            }
         }
 
 
@@ -200,9 +236,14 @@ namespace Netcode
 
         public void DestroyCharacter()
         {
+            if (IsServer)
+            {
+
+            
             for (var i = this.transform.childCount - 1; i >= 0; i--)
             {
                 Destroy(this.transform.GetChild(i).gameObject);
+            }
             }
         }
 
@@ -215,7 +256,8 @@ namespace Netcode
         {
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             yield return new WaitForSeconds(5.0f);
-            players.RestartServerRpc();
+           players.RestartServerRpc();
+            
 
         }
        
@@ -227,6 +269,7 @@ namespace Netcode
             //tie es true cuando ha quedado mas de un personaje vivo
             if (IsServer)
             {
+              
                 StartCoroutine(RestartCoroutine());
             }
          

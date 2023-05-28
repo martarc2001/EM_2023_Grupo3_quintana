@@ -7,6 +7,8 @@ using Unity.Collections;
 using UnityEngine.InputSystem;
 using Netcode;
 using static UnityEngine.InputSystem.HID.HID;
+using UI;
+using UnityEngine.UI;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
@@ -179,63 +181,84 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
-    [ServerRpc (RequireOwnership = false)]
+    [ServerRpc ]
     public void RestartServerRpc()
     {
-        restartClientRpc();
         winnerName = new NetworkVariable<FixedString32Bytes>("");
         error.SetActive(false);
         seconds = 30;
+        readyPlayers.Value = 0;
+        Timer.SetActive(false);
+        gameStarted = false;
+
+        //if (NetworkManager.Singleton.IsServer)
+        //{
+        //    foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        //    {
+        //        if (!IsServer)
+        //        {
+        //            NetworkManager.Singleton.DisconnectClient(client.ClientId);
+        //        }
+        //    }
+          
+          
+        //}
+      
+
+
+
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
 
             var player = client.PlayerObject.GetComponent<PlayerNetworkConfig>();
             var config = client.PlayerObject.GetComponent<PlayerAttributes>();
 
-            print(player);
-            print(player.charName);
-            print(player.serverCharName.Value);
+             print(player);
+             print(player.charName);
+             print(player.serverCharName.Value);
 
-            if (player.dead.Value) {
+           if (player.dead.Value) {
                 print("aaaa");
-                player.dead.Value = false;
-                //oni(clone)
-                //huntress(clone)
-                //azai kaze(clone)
-           
-            string prefabName = config.charaSkin;
-
-            GameObject characterPrefab = player.characterPrefab;
-            GameObject prefab = Resources.Load<GameObject>(prefabName);
-            characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
-            characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
-            characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
-            client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(config.playerName, (int)client.ClientId);
+            player.dead.Value = false;
+          
+          
+                  string prefabName = config.charaSkin;
+                GameObject characterPrefab = player.characterPrefab;
+                GameObject prefab = Resources.Load<GameObject>(prefabName);
+                characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int) OwnerClientId).transform);
+                characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
+                player.characterPrefab = characterPrefab;
+                characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
+               
+               
             }
-
+            restartClientRpc(client.ClientId);
+            config.ChangeInitialSettingsClientRpc(config.playerName,(int)client.ClientId);
+            config.GetSettingsFromPreviousPlayersServerRpc();
         }
-
-        readyPlayers.Value = 0;
-        Timer.SetActive(false);
-        gameStarted = false;
-        
-
-     
-        
+       
     }
-    [ClientRpc]
-    public void restartClientRpc()
+ 
+    //CHARACTERPREFAB, PREFABNAME, PLAYERNAME
+        [ClientRpc]
+    public void restartClientRpc(ulong id)
     {
+        LobbyWaiting.Instance.gameObject.SetActive(true);
+        LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
         Timer.SetActive(false);
         imgGanar.SetActive(false);
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
-        LobbyWaiting.Instance.gameObject.SetActive(true);
-        LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
+
+       // UIHandler.Instance.InstantiateClient();
         error.SetActive(false);
         WinText.text = " ";
+       
+
 
     }
+
+
     public void showGanar() { imgGanar.SetActive(true); }
     public void showPerder() { imgPerder.SetActive(true); }
     public void showEmpate() { imgEmpate.SetActive(true); }

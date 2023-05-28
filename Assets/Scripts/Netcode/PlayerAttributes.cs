@@ -61,6 +61,7 @@ public class PlayerAttributes : NetworkBehaviour
     [ClientRpc]
    public void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
     {
+        
         //Changing the name on prefab
         transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
 
@@ -92,7 +93,7 @@ public class PlayerAttributes : NetworkBehaviour
 
 
     [ServerRpc]
-    void GetSettingsFromPreviousPlayersServerRpc()
+  public  void GetSettingsFromPreviousPlayersServerRpc()
     {
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
         {
