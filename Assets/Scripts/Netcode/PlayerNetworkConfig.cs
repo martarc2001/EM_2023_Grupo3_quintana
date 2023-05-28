@@ -30,10 +30,13 @@ namespace Netcode
         public override void OnNetworkSpawn()
         {
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
+           
             dead.OnValueChanged += OnDeadValueChanged;
             life.OnValueChanged += OnLifeValueChanged;
+            
             playerNum = new NetworkVariable<int>(0);
 
+            
             following = OwnerClientId;
             serverDespawned = new NetworkVariable<bool>(false);
 
@@ -51,6 +54,49 @@ namespace Netcode
                 LobbyWaiting.Instance.waitingText.text = "Waiting for players " + newVal.ToString() + "/" + LobbyManager.Instance.maxPlayers + " ready";
             };
 
+
+        }
+
+        public override void OnDestroy()
+        {
+            if (IsServer)
+            {
+                Debug.Log("IsServer");
+            }
+
+            if (IsOwner)
+            {
+                Debug.Log("IsOwner");
+            }
+            if (IsLocalPlayer)
+            {
+                Debug.Log("IsLocalPlayer");
+            }
+
+            if (IsClient)
+            {
+                Debug.Log("IsClient");
+            }
+
+            if (IsHost)
+            {
+                Debug.Log("IsHost");
+            }
+            if (IsClient && !IsServer)
+            {
+
+                LobbyManager.Instance.LeaveLobby();
+                Debug.Log("Se ejecuta");
+            }
+
+            if (IsServer)
+            {
+
+                LobbyManager.Instance.DeleteLobby();
+                Debug.Log("Se borra el lobby");
+
+            }
+            base.OnDestroy();
 
         }
 
@@ -309,14 +355,12 @@ namespace Netcode
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
-            if (IsLocalPlayer)
-            {
-         
-                LobbyManager.Instance.LeaveLobby();
-            }
-           
+            
+          
+
 
             if (IsServer) {
+               
                 ConnectedPlayers.Instance.readyPlayers.Value = 0;
                 LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
                 GameObject instance=Instantiate(LobbyManager.Instance.leftLobbyMessage);
