@@ -14,6 +14,7 @@ public class ConnectedPlayers : NetworkBehaviour
     public NetworkVariable<int> alivePlayers;
     public NetworkVariable<bool> end;
     NetworkVariable<FixedString32Bytes> winnerName;
+    
 
     public Netcode.PlayerNetworkConfig player1;
     public GameObject error;

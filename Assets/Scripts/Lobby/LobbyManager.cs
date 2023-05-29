@@ -21,7 +21,7 @@ public class LobbyManager : MonoBehaviour
     private float heartBeatTimer;
     public GameObject leftLobbyMessage;
     private const string JOIN_CODE="RelayJoinCode";
-
+    
     public static LobbyManager Instance { get; private set; }
 
     
@@ -55,7 +55,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    private bool IsLobbyHost()
+    public bool IsLobbyHost()
     {
         return joinedLobby != null && joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
     }
@@ -275,5 +275,21 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+
+    public async void KickPlayer(string playerId)
+    {
+        if (IsLobbyHost())
+        {
+            try
+            {
+                await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, playerId);
+               
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.Log(e);
+            }
+        }
+    }
 
 }

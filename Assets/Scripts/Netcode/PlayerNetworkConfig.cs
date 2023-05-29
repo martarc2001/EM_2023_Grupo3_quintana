@@ -17,8 +17,8 @@ namespace Netcode
         public NetworkVariable<bool> dead;//destroyed
         public NetworkVariable<int> playerNum;
         public ulong following;
-        
-        //public NetworkVariable<bool> isReady=new NetworkVariable<bool>(false);
+       
+            //public NetworkVariable<bool> isReady=new NetworkVariable<bool>(false);
       
 
         public ConnectedPlayers players;
@@ -26,11 +26,16 @@ namespace Netcode
 
         public static PlayerNetworkConfig Instance { get; private set; }
 
-        private void Awake() { Instance = this; }
+        private void Awake() { Instance = this; 
+                }
         public override void OnNetworkSpawn()
         {
+            
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
            
+           
+
+
             dead.OnValueChanged += OnDeadValueChanged;
             life.OnValueChanged += OnLifeValueChanged;
             
@@ -59,49 +64,42 @@ namespace Netcode
 
         public override void OnDestroy()
         {
-            if (IsServer)
-            {
-                Debug.Log("IsServer");
-            }
-
-            if (IsOwner)
-            {
-                Debug.Log("IsOwner");
-            }
-            if (IsLocalPlayer)
-            {
-                Debug.Log("IsLocalPlayer");
-            }
-
             if (IsClient)
             {
                 Debug.Log("IsClient");
             }
-
-            if (IsHost)
+            if (IsOwner)
             {
-                Debug.Log("IsHost");
-            }
-            if (IsClient && !IsServer)
-            {
-
-                LobbyManager.Instance.LeaveLobby();
-                Debug.Log("Se ejecuta");
+                Debug.Log("IsOwner");
             }
 
             if (IsServer)
             {
-
-                LobbyManager.Instance.DeleteLobby();
-                Debug.Log("Se borra el lobby");
-
+                Debug.Log("IsServer");
             }
-            base.OnDestroy();
+            if (IsLocalPlayer)
+            {
+                Debug.Log("Islocalplayer");
+            }
+            if (IsHost)
+            {
+                Debug.Log("IsHost");
+            }
+          
+
+
+        
+         
+
+
+
 
         }
 
+
         private void Update()
         {
+      
            
         }
 
@@ -352,14 +350,21 @@ namespace Netcode
 
         #region Handling Disconnection
 
+      
+
+     
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
-            
-          
 
-
+            if (IsClient && !IsServer)
+            {
+                Debug.Log("IsClient");
+                Debug.Log("Se fue del lobbyyyyyy");
+                LobbyManager.Instance.LeaveLobby();
+            }
             if (IsServer) {
+              
                
                 ConnectedPlayers.Instance.readyPlayers.Value = 0;
                 LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
