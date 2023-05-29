@@ -110,14 +110,7 @@ namespace Netcode
             characterPrefab.transform.SetParent(transform, false);
 
         }
-        [ClientRpc]
-       public void resetplayerClientRpc(bool value)
-        {
-           
-            reset.Value = value;
-         //   life.Value = 100;
-            print("resetplayeer"+reset.Value);
-        }
+     
 
         [ServerRpc]
         public void InstantiateOnConnectedPlayersListServerRpc()
@@ -237,7 +230,7 @@ namespace Netcode
                 GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("PlayerPrefab");
                 List<GameObject> otherPlayerObjects = playerObjects.Where(obj => obj.GetComponent<NetworkObject>().OwnerClientId != NetworkManager.Singleton.LocalClientId).ToList(); //This list contains the rest of the prefabs, not the one that just died
 
-                if (otherPlayerObjects.Count > 0 && !reset.Value)
+                if (otherPlayerObjects.Count > 0 && newValue==true)
                 {
                     //Camera follow other player
                     GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
@@ -249,10 +242,8 @@ namespace Netcode
                 }
 
             }
-            if (!reset.Value)
+            if (newValue==true)
             {
-
-
 
                 //HUD Interface
                 changeInterfaceWhenKilledServerRpc(OwnerClientId);

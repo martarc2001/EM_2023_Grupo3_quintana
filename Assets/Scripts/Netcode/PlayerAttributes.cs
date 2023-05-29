@@ -23,7 +23,7 @@ public class PlayerAttributes : NetworkBehaviour
     Color red = new Color(1, 0, 0, 0.35f);
     Color green = new Color(0, 1, 0, 0.35f);
     Color blue = new Color(0, 0, 1, 0.35f);
-
+    Color white = new Color(1, 1, 1, 1);
 
     void Start()
     {
@@ -82,15 +82,17 @@ public class PlayerAttributes : NetworkBehaviour
                 case "Huntress":
                     otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = green;
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().color = white;
                     break;
                 case "Oni":
                     otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = blue;
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().color = white;
                     break;
                 default://"AkaiKaze"
                     otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = red;
-
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
+                    otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().color = white;
                     break;
             }
 

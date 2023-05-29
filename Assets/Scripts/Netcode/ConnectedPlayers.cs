@@ -187,6 +187,7 @@ public class ConnectedPlayers : NetworkBehaviour
     [ServerRpc]
     public void RestartServerRpc()
     {
+        
         winnerName = new NetworkVariable<FixedString32Bytes>("");
         error.SetActive(false);
         seconds = 30;
@@ -203,9 +204,7 @@ public class ConnectedPlayers : NetworkBehaviour
            
 
             player.life.Value = 100;
-            player.reset.Value = true;
-          
-            player.resetplayerClientRpc(true);
+     
 
             if (player.dead.Value)
             {
@@ -307,17 +306,14 @@ public class ConnectedPlayers : NetworkBehaviour
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
         //LobbyManager.Instance.DeleteLobby();
         Timer.SetActive(true);
+        fightSign.SetActive(true);
         Invoke("HideFightSign", 1.5f);
-
+        end.Value = false;
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             //SetGameStartPosition((int)client.ClientId);
             SetGameStartPosition((int)client.ClientId, client.PlayerObject.GetComponent<PlayerNetworkConfig>().playerNum.Value);
             print((int)client.ClientId);
-
-         
-           
-            client.PlayerObject.GetComponent<PlayerNetworkConfig>().resetplayerClientRpc(false);
    
         }
 
@@ -329,6 +325,7 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         gameStarted = true;
         Timer.SetActive(true);
+        fightSign.SetActive(true);
         LobbyWaiting.Instance.gameWillStart.SetActive(false);
     }
 
