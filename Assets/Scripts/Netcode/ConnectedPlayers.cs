@@ -341,7 +341,8 @@ public class ConnectedPlayers : NetworkBehaviour
 
     public void SetGameStartPosition(int idClient, int pos)
     {
-        allPlayers[idClient].transform.GetChild(0).transform.position = spawnPositionList[pos];
+        int playNum = d_clientIdRefersToPlayerNum[(ulong)idClient];
+        allPlayers[playNum].transform.GetChild(0).transform.position = spawnPositionList[pos];
     }
     #endregion
 
