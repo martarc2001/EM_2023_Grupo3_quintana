@@ -39,9 +39,12 @@ namespace Netcode
             playerNum = new NetworkVariable<int>(0);
 
             reset = new NetworkVariable<bool>(false);
+
             //id of the character followed by the player camera
             following = OwnerClientId;
+
             serverDespawned = new NetworkVariable<bool>(false);
+
             //reference to the script "connectedplayers", used to manage server logic
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
 
@@ -97,15 +100,6 @@ namespace Netcode
         {
             InstantiateOnConnectedPlayersListServerRpc();
             ChangeCharacterServerRpc(OwnerClientId, charName);
-
-        }
-
-        [ServerRpc]
-        public void SetSpawnPositionServerRpc(int thisClientId)
-        {
-            Vector3 spawnPosition = GameObject.Find("SpawnPoints").transform.GetChild(thisClientId).transform.position;
-            transform.SetPositionAndRotation(spawnPosition, transform.rotation);
-
         }
 
         [ServerRpc]
@@ -130,8 +124,11 @@ namespace Netcode
 
             dead.Value = false;
 
+            //If someone disconnected previously, we will take its "player numeration" in the game to take their place
+            //Dictionary later refered is used to store a playerNum-OwnerClientId relationship
             playerNum.Value = SetPlayerNum();
             players.d_clientIdRefersToPlayerNum.Add(OwnerClientId, playerNum.Value);
+
             life.Value = 100;
         }
 
@@ -142,7 +139,7 @@ namespace Netcode
             {
                 if (HUD.GetChild(i).gameObject.activeSelf)
                 {
-                    if (HUD.GetChild(i).Find("Disconnected").gameObject.activeSelf)
+                    if (HUD.GetChild(i).Find("Disconnected").gameObject.activeSelf)//If someone disconnected previously, we take their position in the game players list
                     {
                         return i;
                     }
@@ -165,11 +162,11 @@ namespace Netcode
                 healthBarToEdit.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
 
             }
-            catch { } //Deletion of prefab children can affect these lines, do not remove try-catch
+            catch { } //Deletion of player prefab children can affect these lines, do not remove try-catch
             finally
             {
+                //Always showing in all clients on their interface
                 changeLifeInterfaceServerRpc(OwnerClientId, newValue);
-
             }
 
         }
@@ -187,23 +184,22 @@ namespace Netcode
             var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild(numHealthBarToUpdate).Find("HealthBar");
             healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
         }
-        //serverrpc that activates when a player is hurt. It changes its life and checks if the game should end 
 
+        //serverrpc that activates when a player is hurt. It changes its life and checks if the game should end 
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
         {
-
             life.Value -= 20;
 
             if (life.Value <= 0)
             {
-
                 dead.Value = true;
                 players.alivePlayers.Value -= 1;
 
                 if (players.alivePlayers.Value == 1)
                 {
                     ConnectedPlayers.Instance.gameStarted = false;
+
                     //calculate the winner and wait for a few seconds, then execute the checkwin method
                     players.calculateWinner();
                     StartCoroutine(CheckWinCoroutine());
@@ -214,9 +210,6 @@ namespace Netcode
         }
 
         #endregion
-
-
-
 
         #region Getting killed
         /// <summary>
@@ -243,7 +236,6 @@ namespace Netcode
                     GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
                     virtualCamera.Follow = selectedPrefab.transform;
 
-
                     //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
                     following = selectedPrefab.transform.parent.GetComponent<NetworkObject>().OwnerClientId;
                 }
@@ -251,7 +243,6 @@ namespace Netcode
             }
             if (newValue == true)
             {
-
                 //HUD Interface
                 changeInterfaceWhenKilledServerRpc(OwnerClientId);
 
@@ -284,31 +275,29 @@ namespace Netcode
         {
             if (IsServer)
             {
-
-
                 for (var i = this.transform.childCount - 1; i >= 0; i--)
                 {
                     Destroy(this.transform.GetChild(i).gameObject);
                 }
             }
         }
+
         //waits for 3 seconds because it needs time to detect wich character was destroyed
         IEnumerator CheckWinCoroutine()
         {
             yield return new WaitForSeconds(3.0f);
             CheckWinClientRpc(false);
         }
+
         //waits for five seconds so the players can see the you win/you loose message for a bit before restarting the game
         IEnumerator RestartCoroutine()
         {
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             yield return new WaitForSeconds(5.0f);
             players.RestartServerRpc();
-
-
         }
-        //checks wich player has won and wich one has won. It shows a message on screen as well as the name of the winner
 
+        //checks wich player has won and wich one has won. It shows a message on screen as well as the name of the winner
         [ClientRpc]
         public void CheckWinClientRpc(bool tie)
         {
@@ -316,7 +305,6 @@ namespace Netcode
             //tie es true cuando ha quedado mas de un personaje vivo
             if (IsServer)
             {
-
                 StartCoroutine(RestartCoroutine());
             }
 
@@ -344,7 +332,6 @@ namespace Netcode
         #endregion
 
         #region Handling Disconnection
-
 
         //method called when someone disconnects
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
@@ -386,9 +373,7 @@ namespace Netcode
             }
 
             //if the person disconnected is the host, it shows an error to all the clients. Only if the game has started though.
-
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
-
             else
             {
                 if (IsOwner)

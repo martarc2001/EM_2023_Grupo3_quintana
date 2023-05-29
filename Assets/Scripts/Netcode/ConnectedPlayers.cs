@@ -66,7 +66,6 @@ public class ConnectedPlayers : NetworkBehaviour
     }
 
     #region Timer
-
     private void FixedUpdate()
     {
 
@@ -78,7 +77,6 @@ public class ConnectedPlayers : NetworkBehaviour
             }
         }
     }
-
 
     [ServerRpc]
     public void counterServerRpc()

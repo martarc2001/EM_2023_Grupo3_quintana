@@ -27,7 +27,7 @@ public class PlayerAttributes : NetworkBehaviour
 
     void Start()
     {
-        //El owner del objeto avisa al servidor del nombre que ha escogido
+        //Owner of object tells server about choosen name
         if (IsOwner)
         {
             string nameInInputText = GameObject.Find("UI").GetComponent<UIHandler>().playerName;
@@ -49,39 +49,35 @@ public class PlayerAttributes : NetworkBehaviour
     [ClientRpc]
     void ChangeInitialSettingsClientRpc(string playerName)
     {
-
         transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName; //Changing the name on prefab only
-
     }
 
 
-
-
     [ClientRpc]
-   public void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
+    public void ChangeInitialSettingsClientRpc(string playerName, int thisClientID)
     {
-
-        //Changing the name on prefab
-        transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
-
-
-        try
+        try //Protection for second rounds
         {
+            //Changing the name on player HUD prefab
             transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName;
             string otherPlayerSelectedSkin = transform.GetChild(0).gameObject.name.Replace("(Clone)", ""); //When instancing the prefab it shows up as "Huntress(Clone)", removing "(Clone)" for it to be easier to read
 
-            //Changing name and interface appearance
+            //Changing name on interface and interface appearance
             var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild(thisClientID);
-             otherPlayerInterface.Find("Disconnected").gameObject.SetActive(false);//Deactivating it in case someone in that position previously disconnected
+            otherPlayerInterface.Find("Disconnected").gameObject.SetActive(false);//Deactivating it in case someone in that position previously disconnected
             charaSkin = otherPlayerSelectedSkin;
-            otherPlayerInterface.gameObject.SetActive(true);
+            otherPlayerInterface.gameObject.SetActive(true);//Activating interface
             otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = playerName;
+
 
             switch (otherPlayerSelectedSkin)
             {
                 case "Huntress":
                     otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = green;
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
+
+                    //If we come from a previous game, if this character was dead its interface got changed to black.
+                    //We change it back to its original colors in case we are not playing the first game
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().color = white;
                     break;
                 case "Oni":
@@ -98,17 +94,20 @@ public class PlayerAttributes : NetworkBehaviour
 
 
         }
-        catch(Exception ex) { print("excepci�n en changeInitialSettings:" + ex); }
+        catch (Exception ex) { print("Excepcion en changeInitialSettings:" + ex); }
     }
-      
 
-    
+
+
 
 
     [ServerRpc]
-  public  void GetSettingsFromPreviousPlayersServerRpc()
+    public void GetSettingsFromPreviousPlayersServerRpc()
     {
-        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
+        //Per each client, we take its respective Player Attributes in order to asociate its variables to animator and name
+        //This is needed since it wasnt shown data from previously connected players,
+        //only players connected after our own connection
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             string name = client.PlayerObject.GetComponentInChildren<PlayerAttributes>().playerName;
             int playerNum = client.PlayerObject.GetComponent<PlayerNetworkConfig>().playerNum.Value;
