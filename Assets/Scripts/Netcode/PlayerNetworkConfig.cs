@@ -30,7 +30,7 @@ namespace Netcode
                 }
         public override void OnNetworkSpawn()
         {
-            
+            //when the player spawns in the game
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
 
             dead.OnValueChanged += OnDeadValueChanged;
@@ -39,9 +39,10 @@ namespace Netcode
             playerNum = new NetworkVariable<int>(0);
 
             reset = new NetworkVariable<bool>(false);
+            //id of the character followed by the player camera
             following = OwnerClientId;
             serverDespawned = new NetworkVariable<bool>(false);
-
+            //reference to the script "connectedplayers", used to manage server logic
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
 
             ChangeMaxPlayerServerRpc();
@@ -180,7 +181,7 @@ namespace Netcode
             var healthBarToEditOnInterface = GameObject.Find("Canvas - HUD").transform.GetChild(numHealthBarToUpdate).Find("HealthBar");
             healthBarToEditOnInterface.Find("Green").GetComponent<Image>().fillAmount = (float)newValue / 100f;
         }
-
+        //serverrpc that activates when a player is hurt. It changes its life and checks if the game should end 
 
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
@@ -197,7 +198,7 @@ namespace Netcode
                 if (players.alivePlayers.Value == 1)
                 {
                     ConnectedPlayers.Instance.gameStarted = false;
-                    //para calcular quién ha ganado se mira qué jugador queda con mayor vida y se coloca en un networkvariable
+                    //calculate the winner and wait for a few seconds, then execute the checkwin method
                     players.calculateWinner();
                     StartCoroutine(CheckWinCoroutine());
 
@@ -272,6 +273,7 @@ namespace Netcode
         #endregion
 
         #region Winning or losing
+        //detroys the prefab and ui of the character
         public void DestroyCharacter()
         {
             if (IsServer)
@@ -284,12 +286,13 @@ namespace Netcode
                 }
             }
         }
-
+        //waits for 3 seconds because it needs time to detect wich character was destroyed
         IEnumerator CheckWinCoroutine()
         {
             yield return new WaitForSeconds(3.0f);
             CheckWinClientRpc(false);
         }
+        //waits for five seconds so the players can see the you win/you loose message for a bit before restarting the game
         IEnumerator RestartCoroutine()
         {
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
@@ -298,7 +301,7 @@ namespace Netcode
 
 
         }
-
+        //checks wich player has won and wich one has won. It shows a message on screen as well as the name of the winner
 
         [ClientRpc]
         public void CheckWinClientRpc(bool tie)
@@ -317,7 +320,7 @@ namespace Netcode
             }
             else
             {
-                //showwinner tiene que ser clientrpc porque también se llama cuando acaba el contador, que se hace en el server
+                ///showwinner has to be a clientrpc even if its called by a clientrpc already because it's also called by endserver, wich is a serverrpc method
                 players.showWinnerClientRpc();
 
                 if (GameObject.Find("InputSystem").GetComponent<Systems.InputSystem>().Character != null)
@@ -337,7 +340,7 @@ namespace Netcode
         #region Handling Disconnection
 
 
-        //cuando alguien se desconecta se llama a este metodo
+        //method called when someone disconnects
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
             if (IsLocalPlayer)
@@ -376,19 +379,19 @@ namespace Netcode
 
             }
 
-            //si el que se ha desconectado es el host
-          
+            //if the person disconnected is the host, it shows an error to all the clients. Only if the game has started though.
+
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
-            else//si se ha desconectado un cliente
+            else
             {
                 if (IsOwner)
                 {
-                    if (IsServer)//si el que está ejecutando el método es el host, se comprueba si ha quedado mas de uno vivo
+                    if (IsServer)
                     {
                         try
                         {
-                            //solo se calcula el ganador cuando la partida ha empezado
+                            //if the game has started, it checks if there's only one player left with a coroutine.
                             if (ConnectedPlayers.Instance.gameStarted) { StartCoroutine(wait()); }
                         }
                         catch (System.Exception ex) { print(ex); }
@@ -416,15 +419,13 @@ namespace Netcode
         }
 
         IEnumerator wait()
-        {
-            //espera un segundo para que se actualice el connecteclientslist - cuando hay uno vivo se hacen los métodos de calcular, mostrar el ganador, y mostrar a los clientes quien gana y quien pierde
+        {//waits for one second to make sure the connectedclientslist has been updated correctly. If it has only one player left, it calculates the winner.
             yield return new WaitForSeconds(1.0f);
 
             if (NetworkManager.Singleton.ConnectedClientsList.Count == 1)
             {
                 players.calculateWinner();
-                StartCoroutine(CheckWinCoroutine());//corrutina que espera unos segundos y muestra quien ha ganado
-
+                StartCoroutine(CheckWinCoroutine());//shows the winner
             }
 
         }

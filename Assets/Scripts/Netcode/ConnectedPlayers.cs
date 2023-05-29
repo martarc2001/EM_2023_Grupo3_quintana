@@ -13,37 +13,37 @@ using UnityEngine.UI;
 public class ConnectedPlayers : NetworkBehaviour
 {
 
-    public NetworkVariable<int> readyPlayers = new NetworkVariable<int>();
-
-    public NetworkVariable<int> alivePlayers;
-    public NetworkVariable<bool> end;
-    NetworkVariable<FixedString32Bytes> winnerName;
-    
-
-    public Netcode.PlayerNetworkConfig player1;
-    public GameObject error;
-    public GameObject winner;
+    public NetworkVariable<int> readyPlayers = new NetworkVariable<int>();     //players that clicked 'ready'
+    public NetworkVariable<int> alivePlayers;    //number of players that are still alive
+    public NetworkVariable<bool> end;//bool for stopping the timer
+    NetworkVariable<FixedString32Bytes> winnerName;  //name of the winner
+    public Netcode.PlayerNetworkConfig player1;    //reference for playernetworkconfig
+    public GameObject error; //reference for the errormessage when the host disconnects
+    public GameObject winner; //reference for the winner gameobject and its text component
     public TextMeshProUGUI WinText;
-    public List<Netcode.PlayerNetworkConfig> allPlayers;
-    public GameObject leftLobbyMessage;
+
+    public List<Netcode.PlayerNetworkConfig> allPlayers;     //list of players
+    public GameObject leftLobbyMessage;     //reference fot the errormessage when a client disconnects
     public Dictionary<ulong, int> d_clientIdRefersToPlayerNum = new Dictionary<ulong, int>();
 
+    //images win, loose, tie, message for fight
     public GameObject imgGanar;
     public GameObject imgPerder;
     public GameObject imgEmpate;
     public GameObject fightSign;
-    public float seconds;
-    public bool gameStarted = false;
-    public TextMeshProUGUI TimerTxt;
-    public GameObject Timer;
-    [SerializeField] public List<Vector3> spawnPositionList;
 
+    public float seconds;//seconds in the main timer
+    public bool gameStarted = false; //bool for knowing if the game has started or not. Its used for preventing the players from hitting each other in the lobby
+    public TextMeshProUGUI TimerTxt; //reference for the text of the timer
+    public GameObject Timer; //reference for the timer
+    [SerializeField] public List<Vector3> spawnPositionList; //list of positions where the prefabs can spawn
     public static ConnectedPlayers Instance { get; private set; }
-
+    //sorts the player list based on life
     private int sortplayers(Netcode.PlayerNetworkConfig p1, Netcode.PlayerNetworkConfig p2)
     {
         return p1.life.Value.CompareTo(p2.life.Value);
     }
+    //start all the initial values as well as the instance
     private void Awake()
     {
         Instance = this;
@@ -66,6 +66,7 @@ public class ConnectedPlayers : NetworkBehaviour
     }
 
     #region Timer
+
     private void FixedUpdate()
     {
 
@@ -100,7 +101,7 @@ public class ConnectedPlayers : NetworkBehaviour
             }
         }
     }
-
+    //shows the timer element on screen
     void updateTimer(float currentTime)
     {
         currentTime += 1;
@@ -127,7 +128,7 @@ public class ConnectedPlayers : NetworkBehaviour
         int loosingLife = allPlayers[0].life.Value;
         print("ganador:" + winningLife);
 
-        //EMPATE
+        //TIE
         if (winningLife == loosingLife)
         {
 
@@ -138,7 +139,8 @@ public class ConnectedPlayers : NetworkBehaviour
 
             for (int i = 0; i <= allPlayers.Count - 1; i++)
             {
-                //SI TIENE MENOS VIDA QUE EL GANADOR
+                //if they lost= their life is not the winning life. dead turns true wich activates onDeadValueChanged
+                //and deletes the prefab
                 if (allPlayers[i].life.Value != winningLife)
                 {
                     alivePlayers.Value -= 1;
@@ -148,7 +150,7 @@ public class ConnectedPlayers : NetworkBehaviour
                 }
             }
 
-            //mostrar si han ganado o no
+            //shows if they won or lost
             StartCoroutine(Order());
 
         }
@@ -158,33 +160,35 @@ public class ConnectedPlayers : NetworkBehaviour
     #region Checking and showing win
     IEnumerator Order()
     {
-
+        //just as in playernetworkconfig, it waits for 3 seconds
         player1 = GameObject.Find("Player(Clone)").GetComponent<Netcode.PlayerNetworkConfig>();
         yield return new WaitForSeconds(3.0f);
         player1.CheckWinClientRpc(false);
     }
-    //metodo que calcula el ganador
+    
     public Netcode.PlayerNetworkConfig calculateWinner()
     {
         if (IsServer)
         {
-            gameStarted = false;
+            gameStarted = false; // stops gamestarted in case it hadnt stopped yet
 
 
-            allPlayers.Clear();
+            allPlayers.Clear(); //clears all players to fill it again with the connectedplayers
+            //it makes it so the winner is not a disconnected player
             foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
             {
                 allPlayers.Add(client.PlayerObject.GetComponent<Netcode.PlayerNetworkConfig>());
             }
             allPlayers.Sort(sortplayers);
-            Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];
+            Netcode.PlayerNetworkConfig winner = allPlayers[allPlayers.Count - 1];       //checks the winner and gets its name
+
             winnerName.Value = winner.GetComponentInChildren<TextMeshPro>().text;
             return winner;
         }
         return null;
 
     }
-
+    //method that starts everything after the game ends 
     [ServerRpc]
     public void RestartServerRpc()
     {
@@ -196,20 +200,19 @@ public class ConnectedPlayers : NetworkBehaviour
         Timer.SetActive(false);
         gameStarted = false;
         alivePlayers.Value = NetworkManager.Singleton.ConnectedClientsList.Count;
+        //reset clients
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
 
             var player = client.PlayerObject.GetComponent<PlayerNetworkConfig>();
             var config = client.PlayerObject.GetComponent<PlayerAttributes>();
 
-           
-
             player.life.Value = 100;
-     
 
+        
             if (player.dead.Value)
             {
-          
+                //reset the dead player =reinstantiate its prefab
                 player.dead.Value = false;
 
 
@@ -230,7 +233,7 @@ public class ConnectedPlayers : NetworkBehaviour
         }
         if (IsOwner)
         {
-            foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
+            foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //associates the playername and attributes for the other clients
             {
                 string name = client.PlayerObject.GetComponentInChildren<PlayerAttributes>().playerName;
                 client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(name, (int)client.ClientId);
@@ -240,7 +243,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
     }
 
-    //CHARACTERPREFAB, PREFABNAME, PLAYERNAME
+    //Restarting clients
     [ClientRpc]
     public void restartClientRpc(ulong id)
     {
@@ -276,7 +279,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
     #region From lobby to game
     [ServerRpc(RequireOwnership = false)]
-    public void ShowReadyPlayersServerRpc()
+    public void ShowReadyPlayersServerRpc() //showing the number of players that have pressed 'ready'
     {
         readyPlayers.Value++;
         LobbyWaiting.Instance.waitingText.text = "Waiting for players " + readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready";
@@ -285,7 +288,7 @@ public class ConnectedPlayers : NetworkBehaviour
     }
 
 
-
+    //shows the initial countdown and restarts it, first on server then on client
     void WaitCountdown()
     {
         LobbyWaiting.Instance.gameObject.SetActive(false);
@@ -305,7 +308,8 @@ public class ConnectedPlayers : NetworkBehaviour
         GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    //starts the timer.Shows the figth! sign.Restarts the end value to make the countdown work.sets the clients start position in the game
+ [ServerRpc(RequireOwnership = false)]
     public void StartGameServerRpc()
     {
         gameStarted = true;
@@ -325,7 +329,7 @@ public class ConnectedPlayers : NetworkBehaviour
 
         StartGameClientRpc();
     }
-
+    //shows the timer and fight signs and activates gamestarted, so the players can deal damage.
     [ClientRpc]
     void StartGameClientRpc()
     {
