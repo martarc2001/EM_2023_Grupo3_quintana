@@ -265,7 +265,12 @@ public class ConnectedPlayers : NetworkBehaviour
 
     //metodo que muestra a todos los clientes el ganador
     [ClientRpc]
-    public void showWinnerClientRpc() { WinText.text = "¡" + winnerName.Value.ToString() + " wins!"; }
+    public void showWinnerClientRpc() {
+
+       
+         WinText.text = "¡" + winnerName.Value.ToString() + " wins!";
+        winner.SetActive(true);
+    }
     #endregion
 
     #region From lobby to game
