@@ -214,8 +214,8 @@ namespace Netcode
         }
 
         #endregion
-      
-      
+
+
 
 
         #region Getting killed
@@ -237,28 +237,29 @@ namespace Netcode
                 GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("PlayerPrefab");
                 List<GameObject> otherPlayerObjects = playerObjects.Where(obj => obj.GetComponent<NetworkObject>().OwnerClientId != NetworkManager.Singleton.LocalClientId).ToList(); //This list contains the rest of the prefabs, not the one that just died
 
-                if (otherPlayerObjects.Count > 0&& !reset.Value)
+                if (otherPlayerObjects.Count > 0 && !reset.Value)
                 {
                     //Camera follow other player
                     GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
                     virtualCamera.Follow = selectedPrefab.transform;
-                 
+
 
                     //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
                     following = selectedPrefab.transform.parent.GetComponent<NetworkObject>().OwnerClientId;
                 }
-                
+
             }
             if (!reset.Value)
             {
 
-          
 
-            //HUD Interface
-            changeInterfaceWhenKilledServerRpc(OwnerClientId);
 
-            //Deleting character prefab
-            DestroyCharacter();
+                //HUD Interface
+                changeInterfaceWhenKilledServerRpc(OwnerClientId);
+
+                //Deleting character prefab
+                DestroyCharacter();
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]

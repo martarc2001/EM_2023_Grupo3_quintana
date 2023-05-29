@@ -31,7 +31,7 @@ public class TimerScript : NetworkBehaviour
         TimerOn = true;
     }
 
-    void Start() { startTimer(); }
+
 
     public void startTimer() { TimerOn = true; }
 
