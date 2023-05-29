@@ -191,7 +191,7 @@ public class ConnectedPlayers : NetworkBehaviour
         readyPlayers.Value = 0;
         Timer.SetActive(false);
         gameStarted = false;
-
+        alivePlayers.Value = NetworkManager.Singleton.ConnectedClientsList.Count;
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
 
@@ -201,6 +201,12 @@ public class ConnectedPlayers : NetworkBehaviour
             print(player);
             print(player.charName);
             print(player.serverCharName.Value);
+
+           
+            player.reset.Value = true;
+            print("restartserver" + player.reset.Value);
+            player.resetplayerClientRpc(true);
+          //  player.restartcamerasClientRpc(client.ClientId);
 
             if (player.dead.Value)
             {
@@ -215,12 +221,22 @@ public class ConnectedPlayers : NetworkBehaviour
                 characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
                 player.characterPrefab = characterPrefab;
                 characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
-                player.restartcamerasClientRpc(client.ClientId);
+                print("transform cliente"+client.PlayerObject.transform);
+             
 
             }
             restartClientRpc(client.ClientId);
             config.ChangeInitialSettingsClientRpc(config.playerName, (int)client.ClientId);
-            config.GetSettingsFromPreviousPlayersServerRpc();
+            
+        }
+        if (IsOwner)
+        {
+            foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
+            {
+                string name = client.PlayerObject.GetComponentInChildren<PlayerAttributes>().playerName;
+                client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(name, (int)client.ClientId);
+                Debug.Log("Cliente: " + client.ClientId);
+            }
         }
 
     }
@@ -239,7 +255,7 @@ public class ConnectedPlayers : NetworkBehaviour
         // UIHandler.Instance.InstantiateClient();
         error.SetActive(false);
         WinText.text = " ";
-
+        
 
 
     }
@@ -295,7 +311,8 @@ public class ConnectedPlayers : NetworkBehaviour
         {
             SetGameStartPosition((int)client.ClientId);
             print((int)client.ClientId);
-
+            client.PlayerObject.GetComponent<PlayerNetworkConfig>().resetplayerClientRpc(false);
+            print("restartserver" + client.PlayerObject.GetComponent<PlayerNetworkConfig>().reset.Value);
         }
 
         StartGameClientRpc();

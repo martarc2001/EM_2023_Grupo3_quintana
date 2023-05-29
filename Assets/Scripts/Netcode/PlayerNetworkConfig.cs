@@ -17,6 +17,7 @@ namespace Netcode
         public GameObject characterPrefab;
         public NetworkVariable<int> life;
         public NetworkVariable<bool> dead;//destroyed
+        public NetworkVariable<bool> reset;
         public ulong following;
         public string charName;
 
@@ -31,7 +32,7 @@ namespace Netcode
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
             dead.OnValueChanged += OnDeadValueChanged;
             life.OnValueChanged += OnLifeValueChanged;
-
+            reset = new NetworkVariable<bool>(false);
             following = OwnerClientId;
             serverDespawned = new NetworkVariable<bool>(false);
 
@@ -42,7 +43,7 @@ namespace Netcode
             if (!IsOwner) return;
             string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
             charName = prefabName;
-            charName = transform.GetComponent<PlayerAttributes>().charaSkin;
+           
             Spawning();
 
             Invoke("ShowReadyPlayers", 1.0f);
@@ -127,8 +128,14 @@ namespace Netcode
             characterPrefab.transform.SetParent(transform, false);
 
         }
-
-        
+        [ClientRpc]
+       public void resetplayerClientRpc(bool value)
+        {
+            print("hii");
+            reset.Value = value;
+            life.Value = 100;
+            print("resetplayeer"+reset.Value);
+        }
 
         [ServerRpc]
         public void InstantiateOnConnectedPlayersListServerRpc()
@@ -176,10 +183,12 @@ namespace Netcode
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
         {
+            
             life.Value -= 20;
 
             if (life.Value <= 0)
             {
+                
                 dead.Value = true;
                 players.alivePlayers.Value -= 1;
 
@@ -194,16 +203,9 @@ namespace Netcode
             }
 
         }
-        [ClientRpc]
-        public void restartcamerasClientRpc(ulong id)
-        {
-     
-            following = id;
-            ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
-                print(virtualCamera.Follow);
-            virtualCamera.Follow = characterPrefab.transform;
-            
-        }
+
+      
+      
 
 
         /// <summary>
@@ -224,16 +226,17 @@ namespace Netcode
                 GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("PlayerPrefab");
                 List<GameObject> otherPlayerObjects = playerObjects.Where(obj => obj.GetComponent<NetworkObject>().OwnerClientId != NetworkManager.Singleton.LocalClientId).ToList(); //This list contains the rest of the prefabs, not the one that just died
 
-                if (otherPlayerObjects.Count > 0)
+                if (otherPlayerObjects.Count > 0&& !reset.Value)
                 {
                     //Camera follow other player
                     GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
                     virtualCamera.Follow = selectedPrefab.transform;
+                    print("follow mal:" + virtualCamera.Follow);
 
                     //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
                     following = selectedPrefab.transform.parent.GetComponent<NetworkObject>().OwnerClientId;
                 }
-
+                
             }
 
             //HUD Interface
