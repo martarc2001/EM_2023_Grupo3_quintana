@@ -2094,7 +2094,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ProtocolType: 1
+  m_ProtocolType: 0
   m_MaxPacketQueueSize: 128
   m_MaxPayloadSize: 6144
   m_HeartbeatTimeoutMS: 500
@@ -2695,6 +2695,7 @@ GameObject:
   m_Component:
   - component: {fileID: 485274942}
   - component: {fileID: 485274943}
+  - component: {fileID: 485274944}
   m_Layer: 5
   m_Name: TimerStartGame
   m_TagString: Untagged
@@ -2738,7 +2739,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TimeLeft: 5
   TimerOn: 0
+  gameWillStartGameObject: {fileID: 241497306}
+  waitingForPlayersReady: {fileID: 1334694178}
   TimerTxt: {fileID: 1048285566}
+--- !u!114 &485274944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485274941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3582096115
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &493663396
 GameObject:
   m_ObjectHideFlags: 0
@@ -18786,7 +18805,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1389431229}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.8608799, y: 0.48484346, z: -10.063926}
+  m_LocalPosition: {x: 2.1968174, y: 0.4848437, z: -10.063926}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

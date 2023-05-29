@@ -43,7 +43,7 @@ namespace Movement.Components
         void Start()
         {
             player = GetComponent<Netcode.FighterNetworkConfig>();
-            print(player);
+          
             _rigidbody2D = GetComponent<Rigidbody2D>();
             _animator = GetComponent<Animator>();
             _networkAnimator = GetComponent<NetworkAnimator>();

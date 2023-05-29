@@ -3,7 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UI;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,13 +19,11 @@ namespace Netcode
         public NetworkVariable<bool> dead;//destroyed
         public NetworkVariable<int> playerNum;
         public ulong following;
-       
-            //public NetworkVariable<bool> isReady=new NetworkVariable<bool>(false);
-      
-
+        public NetworkVariable<bool> reset;
+        public string charName;
         public ConnectedPlayers players;
         public NetworkVariable<bool> serverDespawned;
-
+        public NetworkVariable<FixedString32Bytes> serverCharName;
         public static PlayerNetworkConfig Instance { get; private set; }
 
         private void Awake() { Instance = this; 
@@ -41,7 +41,7 @@ namespace Netcode
             
             playerNum = new NetworkVariable<int>(0);
 
-            
+            reset = new NetworkVariable<bool>(false);
             following = OwnerClientId;
             serverDespawned = new NetworkVariable<bool>(false);
 
@@ -50,6 +50,8 @@ namespace Netcode
             ChangeMaxPlayerServerRpc();
 
             if (!IsOwner) return;
+            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
+            charName = prefabName;
 
             Spawning();
 
@@ -108,14 +110,12 @@ namespace Netcode
         [ClientRpc]
         void ShowReadyPlayersButtonClientRpc()
         {
-            
-                GameObject instance = Instantiate(LobbyManager.Instance.leftLobbyMessage);
-                Destroy(instance, 1f);
-                LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
-          
+
+            GameObject instance = Instantiate(LobbyManager.Instance.leftLobbyMessage);
+            Destroy(instance, 1f);
+            LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
+
         }
-
-
 
         [ServerRpc(RequireOwnership = false)]
         void ChangeMaxPlayerServerRpc() { ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); }
@@ -131,9 +131,7 @@ namespace Netcode
         public void Spawning()
         {
             InstantiateOnConnectedPlayersListServerRpc();
-
-            string prefabName = GameObject.Find("UI").GetComponent<UIHandler>().playerSprite;
-            ChangeCharacterServerRpc(OwnerClientId, prefabName);
+            ChangeCharacterServerRpc(OwnerClientId, charName);
 
         }
 
@@ -155,9 +153,12 @@ namespace Netcode
 
         }
 
+
         [ServerRpc]
         public void InstantiateOnConnectedPlayersListServerRpc()
         {
+            serverCharName = new NetworkVariable<FixedString32Bytes>(charName);
+
             players.allPlayers.Add(this);
             players.alivePlayers.Value += 1;
             players.player1 = this;
@@ -226,10 +227,12 @@ namespace Netcode
         [ServerRpc(RequireOwnership = false)]
         public void checkLifeServerRpc()
         {
+
             life.Value -= 20;
 
             if (life.Value <= 0)
             {
+
                 dead.Value = true;
                 players.alivePlayers.Value -= 1;
 
@@ -246,6 +249,9 @@ namespace Netcode
         }
 
         #endregion
+
+
+
 
         #region Getting killed
         /// <summary>
@@ -266,23 +272,27 @@ namespace Netcode
                 GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("PlayerPrefab");
                 List<GameObject> otherPlayerObjects = playerObjects.Where(obj => obj.GetComponent<NetworkObject>().OwnerClientId != NetworkManager.Singleton.LocalClientId).ToList(); //This list contains the rest of the prefabs, not the one that just died
 
-                if (otherPlayerObjects.Count > 0)
+                if (otherPlayerObjects.Count > 0 && newValue == true)
                 {
                     //Camera follow other player
                     GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
                     virtualCamera.Follow = selectedPrefab.transform;
+
 
                     //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
                     following = selectedPrefab.transform.parent.GetComponent<NetworkObject>().OwnerClientId;
                 }
 
             }
+            if (newValue == true)
+            {
 
-            //HUD Interface
-            changeInterfaceWhenKilledServerRpc(OwnerClientId);
+                //HUD Interface
+                changeInterfaceWhenKilledServerRpc(OwnerClientId);
 
-            //Deleting character prefab
-            DestroyCharacter();
+                //Deleting character prefab
+                DestroyCharacter();
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -306,9 +316,14 @@ namespace Netcode
         #region Winning or losing
         public void DestroyCharacter()
         {
-            for (var i = this.transform.childCount - 1; i >= 0; i--)
+            if (IsServer)
             {
-                Destroy(this.transform.GetChild(i).gameObject);
+
+
+                for (var i = this.transform.childCount - 1; i >= 0; i--)
+                {
+                    Destroy(this.transform.GetChild(i).gameObject);
+                }
             }
         }
 
@@ -317,6 +332,14 @@ namespace Netcode
             yield return new WaitForSeconds(3.0f);
             CheckWinClientRpc(false);
         }
+        IEnumerator RestartCoroutine()
+        {
+            players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
+            yield return new WaitForSeconds(5.0f);
+            players.RestartServerRpc();
+
+
+        }
 
 
         [ClientRpc]
@@ -324,6 +347,11 @@ namespace Netcode
         {
             players = GameObject.Find("Players").GetComponent<ConnectedPlayers>();
             //tie es true cuando ha quedado mas de un personaje vivo
+            if (IsServer)
+            {
+
+                StartCoroutine(RestartCoroutine());
+            }
 
             if (tie)
             {
@@ -366,9 +394,16 @@ namespace Netcode
             if (IsServer) {
               
                
+
+                LobbyManager.Instance.LeaveLobby();
+            }
+
+
+            if (IsServer)
+            {
                 ConnectedPlayers.Instance.readyPlayers.Value = 0;
                 LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
-                GameObject instance=Instantiate(LobbyManager.Instance.leftLobbyMessage);
+                GameObject instance = Instantiate(LobbyManager.Instance.leftLobbyMessage);
                 Destroy(instance, 1f);
                 try
                 {
@@ -378,10 +413,10 @@ namespace Netcode
                 {
                     Debug.Log("No quedan clientes");
                 }
-              
+
             }
-          
-           
+
+
             //Showing disconnection on HUD Interface
             if (IsOwner)//We want only to enter once through this method
             {
