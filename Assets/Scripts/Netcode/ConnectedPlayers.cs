@@ -6,9 +6,13 @@ using TMPro;
 using Unity.Collections;
 using UnityEngine.InputSystem;
 using Netcode;
+using static UnityEngine.InputSystem.HID.HID;
+using UI;
+using UnityEngine.UI;
 
 public class ConnectedPlayers : NetworkBehaviour
 {
+
     public NetworkVariable<int> readyPlayers = new NetworkVariable<int>();
 
     public NetworkVariable<int> alivePlayers;
@@ -73,6 +77,7 @@ public class ConnectedPlayers : NetworkBehaviour
         }
     }
 
+
     [ServerRpc]
     public void counterServerRpc()
     {
@@ -124,6 +129,7 @@ public class ConnectedPlayers : NetworkBehaviour
         //EMPATE
         if (winningLife == loosingLife)
         {
+
             player1.CheckWinClientRpc(true);
         }
         else
@@ -136,7 +142,7 @@ public class ConnectedPlayers : NetworkBehaviour
                 {
                     alivePlayers.Value -= 1;
 
-                    allPlayers[i].DestroyCharacter();
+                    allPlayers[i].dead.Value = true;
 
                 }
             }
@@ -163,6 +169,7 @@ public class ConnectedPlayers : NetworkBehaviour
         {
             gameStarted = false;
 
+
             allPlayers.Clear();
             foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
             {
@@ -174,6 +181,81 @@ public class ConnectedPlayers : NetworkBehaviour
             return winner;
         }
         return null;
+
+    }
+
+    [ServerRpc]
+    public void RestartServerRpc()
+    {
+        winnerName = new NetworkVariable<FixedString32Bytes>("");
+        error.SetActive(false);
+        seconds = 30;
+        readyPlayers.Value = 0;
+        Timer.SetActive(false);
+        gameStarted = false;
+        alivePlayers.Value = NetworkManager.Singleton.ConnectedClientsList.Count;
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+
+            var player = client.PlayerObject.GetComponent<PlayerNetworkConfig>();
+            var config = client.PlayerObject.GetComponent<PlayerAttributes>();
+
+           
+
+            player.life.Value = 100;
+            player.reset.Value = true;
+          
+            player.resetplayerClientRpc(true);
+
+            if (player.dead.Value)
+            {
+          
+                player.dead.Value = false;
+
+
+                string prefabName = config.charaSkin;
+                GameObject characterPrefab = player.characterPrefab;
+                GameObject prefab = Resources.Load<GameObject>(prefabName);
+                characterPrefab = Instantiate(prefab, GameObject.Find("SpawnPoints").transform.GetChild((int)OwnerClientId).transform);
+                characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
+                player.characterPrefab = characterPrefab;
+                characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
+
+             
+
+            }
+            restartClientRpc(client.ClientId);
+            config.ChangeInitialSettingsClientRpc(config.playerName, (int)client.ClientId);
+            
+        }
+        if (IsOwner)
+        {
+            foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList) //Por cada cliente, coge su respectivo Player Attributes para poder asociar sus variables a animator y nombre
+            {
+                string name = client.PlayerObject.GetComponentInChildren<PlayerAttributes>().playerName;
+                client.PlayerObject.GetComponentInChildren<PlayerAttributes>().ChangeInitialSettingsClientRpc(name, (int)client.ClientId);
+                Debug.Log("Cliente: " + client.ClientId);
+            }
+        }
+
+    }
+
+    //CHARACTERPREFAB, PREFABNAME, PLAYERNAME
+    [ClientRpc]
+    public void restartClientRpc(ulong id)
+    {
+     
+        LobbyWaiting.Instance.gameObject.SetActive(true);
+        LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
+        Timer.SetActive(false);
+        imgGanar.SetActive(false);
+        imgPerder.SetActive(false);
+        imgEmpate.SetActive(false);
+
+        error.SetActive(false);
+        WinText.text = " ";
+        
+
 
     }
 
@@ -203,15 +285,19 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         LobbyWaiting.Instance.gameObject.SetActive(false);
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
+        GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
+       
         WaitCountdownClientRpc();
     }
 
     [ClientRpc]
     void WaitCountdownClientRpc()
     {
+      
         LobbyWaiting.Instance.gameObject.SetActive(false);
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
         GameObject.Find("Canvas").GetComponentInChildren<TimerScript>().startTimer();
+        GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -229,6 +315,10 @@ public class ConnectedPlayers : NetworkBehaviour
             SetGameStartPosition((int)client.ClientId, client.PlayerObject.GetComponent<PlayerNetworkConfig>().playerNum.Value);
             print((int)client.ClientId);
 
+         
+           
+            client.PlayerObject.GetComponent<PlayerNetworkConfig>().resetplayerClientRpc(false);
+   
         }
 
         StartGameClientRpc();

@@ -17,12 +17,14 @@ namespace Netcode
 
             ICinemachineCamera virtualCamera = CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera;
             virtualCamera.Follow = transform;
+  
         }
 
         public void checkLife()
         {
             //todos los clientes         
-         
+
+            this.gameObject.GetComponentInParent<Netcode.PlayerNetworkConfig>().reset.Value = false;
             this.gameObject.GetComponentInParent<Netcode.PlayerNetworkConfig>().checkLifeServerRpc();
            
         }

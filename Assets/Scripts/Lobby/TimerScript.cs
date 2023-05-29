@@ -13,6 +13,23 @@ public class TimerScript : NetworkBehaviour
     public GameObject waitingForPlayersReady;
 
     public TextMeshProUGUI TimerTxt;
+    // Start is called before the first frame update
+    void Start()
+    {
+        TimeLeft = 5;
+        TimerOn=true;
+    }
+    public void restart()
+    {
+        TimeLeft = 5;
+        TimerOn = true;
+    }
+    [ClientRpc]
+    public void restartClientRpc()
+    {
+        TimeLeft = 5;
+        TimerOn = true;
+    }
 
     void Start() { startTimer(); }
 
