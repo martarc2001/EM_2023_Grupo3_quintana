@@ -9,7 +9,7 @@ namespace Netcode
     {
         public override void OnNetworkSpawn()
         {
-            if (!IsOwner) return; //Cuando spawnee, solo hará cosas respecto al personaje el propio poseedor
+            if (!IsOwner) return; // Only the owner can access this method
             
             //FighterMovement ~ el personaje
             FighterMovement fighterMovement = GetComponent<FighterMovement>();

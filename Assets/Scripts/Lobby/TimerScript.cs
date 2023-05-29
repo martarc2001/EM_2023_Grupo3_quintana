@@ -19,22 +19,17 @@ public class TimerScript : NetworkBehaviour
         TimeLeft = 5;
         TimerOn=true;
     }
+    //sets everything to the begining again
     public void restart()
     {
         TimeLeft = 5;
         TimerOn = true;
     }
-    [ClientRpc]
-    public void restartClientRpc()
-    {
-        TimeLeft = 5;
-        TimerOn = true;
-    }
-
 
 
     public void startTimer() { TimerOn = true; }
 
+    //loop that decreases the initial timer: only 5 seconds. At the end, it starts the game
     void Update()
     {
         if (ConnectedPlayers.Instance.readyPlayers.Value == 0)
@@ -60,7 +55,7 @@ public class TimerScript : NetworkBehaviour
     }
 
 
-
+    //update the text of the timer
     void updateTimer(float currentTime)
     {
         currentTime += 1;
@@ -69,7 +64,7 @@ public class TimerScript : NetworkBehaviour
         TimerTxt.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-
+    //deactivate the timer till the players say they are ready
 
     public void checkConnectedPlayers()
     {

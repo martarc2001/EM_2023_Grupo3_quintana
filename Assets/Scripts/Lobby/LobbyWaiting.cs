@@ -20,7 +20,7 @@ public class LobbyWaiting : MonoBehaviour
     void Awake()
     {
      
-       //Ddesactivar el input systema de alguna manera
+       //Deactivates the input when clicked
         Instance = this;
         readyButton.onClick.AddListener(() => {
 
