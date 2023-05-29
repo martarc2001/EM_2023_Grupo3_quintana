@@ -254,10 +254,6 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public Lobby GetLobby()
-    {
-        return joinedLobby;
-    }
 
    public async void LeaveLobby()
     {

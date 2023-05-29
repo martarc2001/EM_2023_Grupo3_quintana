@@ -32,9 +32,6 @@ namespace Netcode
         {
             
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
-           
-           
-
 
             dead.OnValueChanged += OnDeadValueChanged;
             life.OnValueChanged += OnLifeValueChanged;
@@ -64,46 +61,7 @@ namespace Netcode
 
         }
 
-        public override void OnDestroy()
-        {
-            if (IsClient)
-            {
-                Debug.Log("IsClient");
-            }
-            if (IsOwner)
-            {
-                Debug.Log("IsOwner");
-            }
 
-            if (IsServer)
-            {
-                Debug.Log("IsServer");
-            }
-            if (IsLocalPlayer)
-            {
-                Debug.Log("Islocalplayer");
-            }
-            if (IsHost)
-            {
-                Debug.Log("IsHost");
-            }
-          
-
-
-        
-         
-
-
-
-
-        }
-
-
-        private void Update()
-        {
-      
-           
-        }
 
         #region Lobby
 
@@ -378,26 +336,14 @@ namespace Netcode
 
         #region Handling Disconnection
 
-      
 
-     
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
-
-            if (IsClient && !IsServer)
+            if (IsLocalPlayer)
             {
-                Debug.Log("IsClient");
-                Debug.Log("Se fue del lobbyyyyyy");
                 LobbyManager.Instance.LeaveLobby();
             }
-            if (IsServer) {
-              
-               
-
-                LobbyManager.Instance.LeaveLobby();
-            }
-
 
             if (IsServer)
             {
@@ -431,7 +377,7 @@ namespace Netcode
             }
 
             //si el que se ha desconectado es el host
-            if (!ConnectedPlayers.Instance.gameStarted) return;
+          
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
             else//si se ha desconectado un cliente
