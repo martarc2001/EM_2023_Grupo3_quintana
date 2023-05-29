@@ -202,11 +202,10 @@ public class ConnectedPlayers : NetworkBehaviour
             print(player.charName);
             print(player.serverCharName.Value);
 
-           
+            player.life.Value = 100;
             player.reset.Value = true;
             print("restartserver" + player.reset.Value);
             player.resetplayerClientRpc(true);
-          //  player.restartcamerasClientRpc(client.ClientId);
 
             if (player.dead.Value)
             {
@@ -245,6 +244,7 @@ public class ConnectedPlayers : NetworkBehaviour
     [ClientRpc]
     public void restartClientRpc(ulong id)
     {
+     
         LobbyWaiting.Instance.gameObject.SetActive(true);
         LobbyWaiting.Instance.readyButton.gameObject.SetActive(true);
         Timer.SetActive(false);
@@ -252,7 +252,6 @@ public class ConnectedPlayers : NetworkBehaviour
         imgPerder.SetActive(false);
         imgEmpate.SetActive(false);
 
-        // UIHandler.Instance.InstantiateClient();
         error.SetActive(false);
         WinText.text = " ";
         
@@ -279,8 +278,9 @@ public class ConnectedPlayers : NetworkBehaviour
 
         if (readyPlayers.Value == LobbyManager.Instance.maxPlayers)
         {
+           
+            
             WaitCountdown();
-            GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
         }
     }
 
@@ -288,14 +288,18 @@ public class ConnectedPlayers : NetworkBehaviour
     {
         LobbyWaiting.Instance.gameObject.SetActive(false);
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
+        GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
+       
         WaitCountdownClientRpc();
     }
 
     [ClientRpc]
     void WaitCountdownClientRpc()
     {
+      
         LobbyWaiting.Instance.gameObject.SetActive(false);
         LobbyWaiting.Instance.gameWillStart.SetActive(true);
+        GameObject.Find("TimerStartGame").GetComponent<TimerScript>().restart();
     }
 
     [ServerRpc(RequireOwnership = false)]

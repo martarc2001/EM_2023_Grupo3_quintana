@@ -21,6 +21,12 @@ public class TimerScript : NetworkBehaviour
         TimeLeft = 5;
         TimerOn = true;
     }
+    [ClientRpc]
+    public void restartClientRpc()
+    {
+        TimeLeft = 5;
+        TimerOn = true;
+    }
 
     // Update is called once per frame
     void Update()

@@ -1,4 +1,5 @@
 using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -87,13 +88,14 @@ public class PlayerAttributes : NetworkBehaviour
                     break;
                 default://"AkaiKaze"
                     otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = red;
+                print("cambiando el bg a " + red);
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
                     break;
             }
 
 
         }
-        catch { }
+        catch(Exception ex) { print("excepción en changeInitialSettings:" + ex); }
     }
       
 

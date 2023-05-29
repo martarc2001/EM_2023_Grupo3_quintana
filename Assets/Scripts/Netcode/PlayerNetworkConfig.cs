@@ -55,41 +55,7 @@ namespace Netcode
 
         }
 
-        
-
-            //[ClientRpc]
-            //public void restartskinsClientRpc(ulong id, string skin, string name) {
-
-
-
-            //    characterPrefab.transform.SetParent(transform, false);
-            //    characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text = name;
-            //    //client.PlayerObject.GetComponent<PlayerAttributes>().ChangeInitialSettingsClientRpc(config.playerName, (int) client.ClientId);
-            //    print(characterPrefab);
-            //    print(characterPrefab.transform.GetChild(2).Find("Name").GetComponent<TextMeshPro>().text);
-            //    var otherPlayerInterface = GameObject.Find("Canvas - HUD").transform.GetChild((int)id);
-            //    otherPlayerInterface.gameObject.SetActive(true);
-            //    otherPlayerInterface.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>().text = name;
-            //    print(skin);
-            //    print(name);
-
-            //    switch (skin)
-            //    {
-            //        case "Huntress":
-            //            otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 1, 0, 0.35f);
-            //            otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Huntress_HUD");
-            //            break;
-            //        case "Oni":
-            //            otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(0, 0, 1, 0.35f);
-            //            otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Oni_HUD");
-            //            break;
-            //        default://"AkaiKaze"
-            //            otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = new Color(1, 0, 0, 0.35f);
-            //            otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
-            //            break;
-            //    }
-            //}
-
+       
 
             #region Lobby
             [ServerRpc(RequireOwnership = false)]
@@ -133,7 +99,7 @@ namespace Netcode
         {
             print("hii");
             reset.Value = value;
-            life.Value = 100;
+         //   life.Value = 100;
             print("resetplayeer"+reset.Value);
         }
 
@@ -238,13 +204,18 @@ namespace Netcode
                 }
                 
             }
+            if (!reset.Value)
+            {
+
+          
 
             //HUD Interface
             var background = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("BG");
             background.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.35f);
             var sprite = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("Sprite");
             sprite.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.5f);
-
+                print("cambiando a gris");
+            }
             //Deleting character prefab
             DestroyCharacter();
         }
