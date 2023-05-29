@@ -97,7 +97,7 @@ namespace Netcode
         [ClientRpc]
        public void resetplayerClientRpc(bool value)
         {
-            print("hii");
+           
             reset.Value = value;
          //   life.Value = 100;
             print("resetplayeer"+reset.Value);
@@ -197,7 +197,7 @@ namespace Netcode
                     //Camera follow other player
                     GameObject selectedPrefab = otherPlayerObjects[UnityEngine.Random.Range(0, otherPlayerObjects.Count)];
                     virtualCamera.Follow = selectedPrefab.transform;
-                    print("follow mal:" + virtualCamera.Follow);
+                 
 
                     //Changing the following property to the one theyre following (used in case the one that got killed was the one you were following)
                     following = selectedPrefab.transform.parent.GetComponent<NetworkObject>().OwnerClientId;
@@ -214,7 +214,7 @@ namespace Netcode
             background.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.35f);
             var sprite = GameObject.Find("Canvas - HUD").transform.GetChild((int)OwnerClientId).Find("Sprite");
             sprite.GetComponent<Image>().color = new Color(0.25f, 0.25f, 0.25f, 0.5f);
-                print("cambiando a gris");
+              
             }
             //Deleting character prefab
             DestroyCharacter();

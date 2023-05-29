@@ -51,7 +51,7 @@ public class PlayerAttributes : NetworkBehaviour
     [ClientRpc]
     void ChangeInitialSettingsClientRpc(string playerName)
     {
-        print(playerName);
+
         transform.GetChild(0).Find("HUD").Find("Name").GetComponent<TextMeshPro>().text = playerName; //Changing the name on prefab only
 
     }
@@ -88,7 +88,7 @@ public class PlayerAttributes : NetworkBehaviour
                     break;
                 default://"AkaiKaze"
                     otherPlayerInterface.transform.Find("BG").gameObject.GetComponent<Image>().color = red;
-                print("cambiando el bg a " + red);
+
                     otherPlayerInterface.transform.Find("Sprite").gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("AkaiKaze_HUD");
                     break;
             }

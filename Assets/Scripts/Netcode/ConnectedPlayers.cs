@@ -198,18 +198,16 @@ public class ConnectedPlayers : NetworkBehaviour
             var player = client.PlayerObject.GetComponent<PlayerNetworkConfig>();
             var config = client.PlayerObject.GetComponent<PlayerAttributes>();
 
-            print(player);
-            print(player.charName);
-            print(player.serverCharName.Value);
+           
 
             player.life.Value = 100;
             player.reset.Value = true;
-            print("restartserver" + player.reset.Value);
+          
             player.resetplayerClientRpc(true);
 
             if (player.dead.Value)
             {
-                print("aaaa");
+          
                 player.dead.Value = false;
 
 
@@ -220,7 +218,7 @@ public class ConnectedPlayers : NetworkBehaviour
                 characterPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(client.ClientId);
                 player.characterPrefab = characterPrefab;
                 characterPrefab.transform.SetParent(client.PlayerObject.transform, false);
-                print("transform cliente"+client.PlayerObject.transform);
+
              
 
             }
@@ -314,9 +312,9 @@ public class ConnectedPlayers : NetworkBehaviour
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             SetGameStartPosition((int)client.ClientId);
-            print((int)client.ClientId);
+           
             client.PlayerObject.GetComponent<PlayerNetworkConfig>().resetplayerClientRpc(false);
-            print("restartserver" + client.PlayerObject.GetComponent<PlayerNetworkConfig>().reset.Value);
+   
         }
 
         StartGameClientRpc();
