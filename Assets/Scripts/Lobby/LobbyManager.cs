@@ -16,14 +16,14 @@ using UnityEngine;
 public class LobbyManager : MonoBehaviour
 {
 
-    public int maxPlayers;
-    public Lobby joinedLobby;
-    private float heartBeatTimer;
-    public GameObject leftLobbyMessage;
-    private const string JOIN_CODE="RelayJoinCode";
+    public int maxPlayers;//Numero maximo de jugadores establecido por el host del lobby
+    public Lobby joinedLobby;//La lobby a la que te has unido/la que has creado
+    private float heartBeatTimer;//Cada cierto tiempo se ejecuta un código para indicar que el lobby sigue activo
+    public GameObject leftLobbyMessage;//prefab que instanciamos cuando alguien se sale del lobby
+    private const string JOIN_CODE="RelayJoinCode";//El codigo para unirse al Relay
     
     public static LobbyManager Instance { get; private set; }
-
+    //Instancia estatica para acceder desde otras clases
     
     private void Awake()
     {
@@ -31,32 +31,33 @@ public class LobbyManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        InitializeUnityAuthentication();
+        InitializeUnityAuthentication();//Inicializar UnityServices y acceso
     }
 
     void Update()
     {
-        HandleLobbyHeartbeat();
+        HandleLobbyHeartbeat();//Para que el lobby reciba logica que ejecutar cada x tiempo
      
     }
 
-    private void HandleLobbyHeartbeat()
+    private void HandleLobbyHeartbeat()//Si el lobby no hace nada en 30s se cierra por ello se crea esta función
     {
-        if (IsLobbyHost())
+        if (IsLobbyHost())//Si es el host del lobby
         {
-            heartBeatTimer -= Time.deltaTime;
-            if (heartBeatTimer <= 0f)
+            heartBeatTimer -= Time.deltaTime;//Restamos al timer
+            if (heartBeatTimer <= 0f)//Cuando sea 0
             {
-                float heartBeatTimerMax = 15f;
+                float heartBeatTimerMax = 15f;//Lo reiniciamos
                 heartBeatTimer = heartBeatTimerMax;
 
-                LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
+                LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);//Envía un mensaje al servidor para indicar que el lobby está activo
             }
         }
     }
 
-    public bool IsLobbyHost()
+    public bool IsLobbyHost()//Metodo que te devuelve si eres o no el host de la lobby
     {
+
         return joinedLobby != null && joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
     }
     private async void InitializeUnityAuthentication()
@@ -69,9 +70,10 @@ public class LobbyManager : MonoBehaviour
             InitializationOptions initializationOptions = new InitializationOptions();
             initializationOptions.SetProfile(Random.Range(0, 10000).ToString());
 
-            await UnityServices.InitializeAsync(initializationOptions);
+            await UnityServices.InitializeAsync(initializationOptions);//Inicializamos UnityServices
 
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();//Iniciamos sesion en la aplicación anonimamente, el ususario
+            //no necesita iniciar sesión para acceder
         }
     }
 
@@ -98,7 +100,8 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            string relayJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            string relayJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);//Te proporciona un codigo para unirte
+            //con otros usuarios sin necesidad de conocer las Ips
             return relayJoinCode;
 
         }catch(RelayServiceException e)
@@ -112,7 +115,8 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            JoinAllocation jAllocation=await RelayService.Instance.JoinAllocationAsync(joinCode);
+            JoinAllocation jAllocation=await RelayService.Instance.JoinAllocationAsync(joinCode);//Se usa para unirse a un lobby determinado
+            //identificado por un código creado anteriormente
 
             return jAllocation;
         }
@@ -126,13 +130,15 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
+            //Creamos una lobby, le metemos el nombre, numero de jugadores e indicamos si es publica o privada
             joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
             });
 
-            if (isPrivate) {
-                InfoLobby.Instance.ShowInfo(lobbyName, joinedLobby.LobbyCode);
+            
+            if (isPrivate) {//Si es privada
+                InfoLobby.Instance.ShowInfo(lobbyName, joinedLobby.LobbyCode);//Le mostramos al host el codig
             }
 
             //Levantamos el Allocation
@@ -140,6 +146,7 @@ public class LobbyManager : MonoBehaviour
             Allocation allocation=await AllocateRelay();
             string relayJoinCode = await GetRelayJoinCode(allocation);
 
+            //Usamos esto para "conectar" el código del Relay con los diferentes jugadores que se unan a la lobby
             await LobbyService.Instance.UpdateLobbyAsync(joinedLobby.Id, new UpdateLobbyOptions
             {
                 Data = new Dictionary<string, DataObject>
@@ -148,8 +155,13 @@ public class LobbyManager : MonoBehaviour
                 }
             });
 
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation,"dtls"));
 
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation,"dtls"));
+            //Esta linea de codigo accede al componente UnityTransport que se utiliza para gestionar la conexión en red 
+            //Se crea un nuevo relayServerData que configura los datos del servidor relay pasando como parámetros de entrada
+            //La asignación al servidor relay y el protocolo de seguridad de transporte que se usará
+
+            //Y tras esto, instanciamos el host
             UIHandler.Instance.InstantiateHost();
         }
         catch(LobbyServiceException e)
@@ -176,25 +188,25 @@ public class LobbyManager : MonoBehaviour
             };
             QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);//nos devuelve la info de las lobbies creadas
 
-            if (queryResponse.Results.Count != 0)
+            if (queryResponse.Results.Count != 0)//si hay alguna lobby con huecos vacios
             {
-                joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+                joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();//Te unes
 
-                string relayJoinCode = joinedLobby.Data[JOIN_CODE].Value;
-                JoinAllocation joinAllocation= await JoinRelay(relayJoinCode);
+                string relayJoinCode = joinedLobby.Data[JOIN_CODE].Value;//Accedemos al código del server Relay
+                JoinAllocation joinAllocation= await JoinRelay(relayJoinCode);//Nos unimos a él
 
                 NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+                //establecemos el RelayServerData
 
 
                 //Instanciamos un cliente 
-                //NetworkManager.Singleton.StartClient();
                 UIHandler.Instance.InstantiateClient();
-                LobbyJoinUI.Instance.gameObject.SetActive(false);
+                LobbyJoinUI.Instance.gameObject.SetActive(false);//Ocultamos el menu de elejir
             }
             else
             {
-                LobbyJoinUI.Instance.ShowIssue();
-                           }
+                LobbyJoinUI.Instance.ShowIssue();//Si no hay lobbies disponibles lo decimos
+            }
 
         
         }
@@ -210,13 +222,10 @@ public class LobbyManager : MonoBehaviour
       
         try
         {
-            joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);//Si es una lobby privada nos unimos con un código
 
-            //Instanciamos un cliente 
-            //NetworkManager.Singleton.StartClient();
 
-          
-
+            //Accedemos al código del server Relay
             string relayJoinCode = joinedLobby.Data[JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
 
@@ -233,7 +242,7 @@ public class LobbyManager : MonoBehaviour
         }
         catch(LobbyServiceException e)
         {
-            LobbyJoinUI.Instance.ShowIssue();
+            LobbyJoinUI.Instance.ShowIssue();//Si da un error se muestra
             Debug.Log(e);
         }
     }
