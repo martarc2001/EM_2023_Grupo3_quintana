@@ -56,12 +56,6 @@ namespace Netcode
 
 
         }
-
-        private void Update()
-        {
-           
-        }
-
         #region Lobby
 
         [ClientRpc]
