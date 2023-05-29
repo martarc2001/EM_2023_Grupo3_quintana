@@ -26,12 +26,16 @@ namespace Netcode
         public NetworkVariable<FixedString32Bytes> serverCharName;
         public static PlayerNetworkConfig Instance { get; private set; }
 
-        private void Awake() { Instance = this; }
+        private void Awake() { Instance = this; 
+                }
         public override void OnNetworkSpawn()
         {
+            
             NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectCallback;
+
             dead.OnValueChanged += OnDeadValueChanged;
             life.OnValueChanged += OnLifeValueChanged;
+            
             playerNum = new NetworkVariable<int>(0);
 
             reset = new NetworkVariable<bool>(false);
@@ -56,6 +60,9 @@ namespace Netcode
 
 
         }
+
+
+
         #region Lobby
 
         [ClientRpc]
@@ -329,15 +336,14 @@ namespace Netcode
 
         #region Handling Disconnection
 
+
         //cuando alguien se desconecta se llama a este metodo
         private void Singleton_OnClientDisconnectCallback(ulong clientId)
         {
             if (IsLocalPlayer)
             {
-
                 LobbyManager.Instance.LeaveLobby();
             }
-
 
             if (IsServer)
             {
@@ -371,7 +377,7 @@ namespace Netcode
             }
 
             //si el que se ha desconectado es el host
-            if (!ConnectedPlayers.Instance.gameStarted) return;
+          
             if (clientId == NetworkManager.ServerClientId) { players.showError(); }
 
             else//si se ha desconectado un cliente
