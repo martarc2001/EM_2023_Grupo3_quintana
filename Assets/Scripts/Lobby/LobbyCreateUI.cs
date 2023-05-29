@@ -7,8 +7,7 @@ using UnityEngine.UI;
 
 public class LobbyCreateUI : MonoBehaviour
 {
-    //[SerializeField] private GameObject lobby;
-    //private LobbyManager lobbyManager;
+  
     [SerializeField] private Button publicLobbyButton;
     [SerializeField] private Button privateLobbyButton;
     [SerializeField] private TMP_InputField lobbyName;
@@ -22,7 +21,6 @@ public class LobbyCreateUI : MonoBehaviour
 private void Awake()
     {
 
-        //lobbyManager = lobby.GetComponent<LobbyManager>();
         publicLobbyButton.onClick.AddListener(()=> {
             LobbyManager.Instance.CreateLobby(lobbyName.text,false);          
             gameObject.SetActive(false);

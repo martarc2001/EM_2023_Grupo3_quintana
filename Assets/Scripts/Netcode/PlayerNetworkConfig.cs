@@ -14,9 +14,9 @@ namespace Netcode
 {
     public class PlayerNetworkConfig : NetworkBehaviour
     {
-        public GameObject characterPrefab;
+        public GameObject characterPrefab; 
         public NetworkVariable<int> life;
-        public NetworkVariable<bool> dead;//destroyed
+        public NetworkVariable<bool> dead;
         public NetworkVariable<int> playerNum;
         public ulong following;
         public NetworkVariable<bool> reset;
@@ -67,7 +67,7 @@ namespace Netcode
         #region Lobby
 
         [ClientRpc]
-        void ShowReadyPlayersButtonClientRpc()
+        void ShowReadyPlayersButtonClientRpc()//Método que permite volver a darle a ready cuando un jugador se desconecta en el lobby
         {
 
             GameObject instance = Instantiate(LobbyManager.Instance.leftLobbyMessage);
@@ -77,12 +77,18 @@ namespace Netcode
         }
 
         [ServerRpc(RequireOwnership = false)]
-        void ChangeMaxPlayerServerRpc() { ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); }
+        void ChangeMaxPlayerServerRpc()//Metodo que cambia el numero maximo de jugadores para los clientes
+        { 
+            ChangeMaxPlayerClientRpc(LobbyManager.Instance.maxPlayers); 
+            //Pasando como parámetro de entrada el numero máximo de jugadores se lo cambiamos a todos los clientes
+        }
 
         [ClientRpc]
-        void ChangeMaxPlayerClientRpc(int players) { LobbyManager.Instance.maxPlayers = players; }
+        void ChangeMaxPlayerClientRpc(int players) { LobbyManager.Instance.maxPlayers = players; }//Cambia el numero maximo de players para poder enseñarlo a todos los clientes
 
-        void ShowReadyPlayers() { LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready"; }
+        void ShowReadyPlayers() {//Metodo que se ejecuta en todos los jugadores cuando spawnean
+            LobbyWaiting.Instance.waitingText.text = "Waiting for players " + ConnectedPlayers.Instance.readyPlayers.Value + "/" + LobbyManager.Instance.maxPlayers + " ready"; 
+        }
 
         #endregion
 
